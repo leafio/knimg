@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"fmt"
 	"image"
 	"image/jpeg"
@@ -27,7 +28,7 @@ func NewCompressHandler(baseDir string) *CompressHandler {
 	}
 }
 
-// CompressFiles 批量压缩图片
+// CompressFiles 批量压缩图片（支持流式进度）
 func (h *CompressHandler) CompressFiles(c *gin.Context) {
 	var req models.CompressRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -73,26 +74,37 @@ func (h *CompressHandler) CompressFiles(c *gin.Context) {
 		outputDir = filepath.Join(workDir, "compressed")
 	}
 
-	// 创建输出目录
-	if err := os.MkdirAll(outputDir, 0755); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"message": "无法创建输出目录",
-		})
-		return
+	// 创建输出目录（如果不覆盖原文件）
+	if !req.Overwrite {
+		if err := os.MkdirAll(outputDir, 0755); err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{
+				"success": false,
+				"message": "无法创建输出目录",
+			})
+			return
+		}
 	}
+
+	// 设置响应头为流式
+	c.Header("Content-Type", "text/plain; charset=utf-8")
+	c.Header("X-Content-Type-Options", "nosniff")
 
 	var totalOrigSize, totalNewSize int64
 	var successCount int
 	var failedFiles []string
+	fileCount := len(req.Files)
 
-	for _, filePath := range req.Files {
+	for i, filePath := range req.Files {
 		fullPath := filepath.Join(workDir, filePath)
 
 		// 检查文件是否存在
 		fileInfo, err := os.Stat(fullPath)
 		if os.IsNotExist(err) {
 			failedFiles = append(failedFiles, filePath+" (文件不存在)")
+			// 更新进度
+			progress := (i + 1) * 100 / fileCount
+			fmt.Fprintf(c.Writer, "progress:%d\n", progress)
+			c.Writer.Flush()
 			continue
 		}
 
@@ -100,17 +112,26 @@ func (h *CompressHandler) CompressFiles(c *gin.Context) {
 		adjustedQuality := h.getSmartQuality(fileInfo.Size(), quality)
 
 		// 压缩文件
-		newSize, err := h.compressImage(fullPath, outputDir, adjustedQuality)
+		outputPath := outputDir
+		if req.Overwrite {
+			outputPath = filepath.Dir(fullPath)
+		}
+		newSize, err := h.compressImage(fullPath, outputPath, adjustedQuality, req.Overwrite)
 		if err != nil {
 			failedFiles = append(failedFiles, filePath+" ("+err.Error()+")")
-			continue
+		} else {
+			totalOrigSize += fileInfo.Size()
+			totalNewSize += newSize
+			successCount++
 		}
 
-		totalOrigSize += fileInfo.Size()
-		totalNewSize += newSize
-		successCount++
+		// 更新进度
+		progress := (i + 1) * 100 / fileCount
+		fmt.Fprintf(c.Writer, "progress:%d\n", progress)
+		c.Writer.Flush()
 	}
 
+	// 构建响应
 	response := gin.H{
 		"success":     true,
 		"message":     fmt.Sprintf("成功压缩 %d 个图片", successCount),
@@ -126,7 +147,18 @@ func (h *CompressHandler) CompressFiles(c *gin.Context) {
 		response["failed_count"] = len(failedFiles)
 	}
 
-	c.JSON(http.StatusOK, response)
+	// 发送最终响应
+	fmt.Fprintf(c.Writer, "data:%s\n", toJSON(response))
+	c.Writer.Flush()
+}
+
+// toJSON 转换为 JSON 字符串
+func toJSON(v interface{}) string {
+	data, err := json.Marshal(v)
+	if err != nil {
+		return "{}"
+	}
+	return string(data)
 }
 
 // getSmartQuality 智能质量选择策略
@@ -161,8 +193,8 @@ func (h *CompressHandler) getSmartQuality(fileSize int64, baseQuality int) int {
 	}
 }
 
-// compressImage 压缩单个图片
-func (h *CompressHandler) compressImage(inputPath, outputDir string, quality int) (int64, error) {
+// compressImage 压缩单个图片（支持覆盖原文件）
+func (h *CompressHandler) compressImage(inputPath, outputDir string, quality int, overwrite bool) (int64, error) {
 	// 打开图片文件
 	file, err := os.Open(inputPath)
 	if err != nil {
@@ -183,6 +215,13 @@ func (h *CompressHandler) compressImage(inputPath, outputDir string, quality int
 	// 智能格式选择：WebP 统一转为 JPEG 以获得更好兼容性
 	// PNG 保持 PNG（无损），其他转为 JPEG
 	outputPath := filepath.Join(outputDir, filename)
+
+	// 如果是覆盖原文件，先删除原文件
+	if overwrite && inputPath == outputPath {
+		if err := os.Remove(inputPath); err != nil {
+			return 0, err
+		}
+	}
 
 	outputFile, err := os.Create(outputPath)
 	if err != nil {

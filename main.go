@@ -5,6 +5,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"knimg/handlers"
@@ -36,28 +37,45 @@ func main() {
 
 	var baseDir string
 
+	// 获取当前工作目录
+	currentDir, err := os.Getwd()
+	if err != nil {
+		fmt.Printf("错误: 无法获取当前目录: %v\n", err)
+		fmt.Println("按任意键退出...")
+		var input string
+		fmt.Scanln(&input)
+		os.Exit(1)
+	}
+
 	// 获取可执行文件所在目录
 	execPath, err := os.Executable()
 	if err != nil {
-		fmt.Printf("错误: 无法获取可执行文件路径: %v\n", err)
-		// 使用当前目录作为备选
-		baseDir, err = os.Getwd()
-		if err != nil {
-			fmt.Printf("错误: 无法获取当前目录: %v\n", err)
-			fmt.Println("按任意键退出...")
-			var input string
-			fmt.Scanln(&input)
-			os.Exit(1)
-		}
+		fmt.Printf("警告: 无法获取可执行文件路径: %v\n", err)
+		baseDir = currentDir
 		fmt.Printf("使用当前目录: %s\n", baseDir)
 		log.Printf("使用当前目录: %s", baseDir)
 	} else {
 		fmt.Printf("可执行文件路径: %s\n", execPath)
 		log.Printf("可执行文件路径: %s", execPath)
 
-		baseDir = filepath.Dir(execPath)
-		fmt.Printf("基础目录: %s\n", baseDir)
-		log.Printf("基础目录: %s", baseDir)
+		execDir := filepath.Dir(execPath)
+		
+		// 检查是否在临时目录中运行（开发模式）
+		isDevMode := strings.Contains(execPath, "go-build") || 
+		             strings.Contains(execPath, "/Temp/") ||
+		             strings.Contains(execPath, "\\Temp\\")
+		
+		if isDevMode {
+			// 开发模式：使用当前工作目录
+			baseDir = currentDir
+			fmt.Printf("开发模式 - 使用当前工作目录: %s\n", baseDir)
+			log.Printf("开发模式 - 使用当前工作目录: %s", baseDir)
+		} else {
+			// 生产模式：使用可执行文件目录
+			baseDir = execDir
+			fmt.Printf("生产模式 - 使用可执行文件目录: %s\n", baseDir)
+			log.Printf("生产模式 - 使用可执行文件目录: %s", baseDir)
+		}
 	}
 
 	// 确保目录存在
@@ -121,16 +139,36 @@ func main() {
 	frontendDir := filepath.Join(baseDir, "frontend")
 	fmt.Printf("前端目录: %s\n", frontendDir)
 	log.Printf("前端目录: %s", frontendDir)
+	
+	// 如果前端目录不存在，尝试使用当前工作目录
 	if _, err := os.Stat(frontendDir); os.IsNotExist(err) {
-		fmt.Printf("错误: 前端目录不存在: %s\n", frontendDir)
-		fmt.Println("请确保 frontend 文件夹与 knimg.exe 在同一目录")
-		fmt.Println("按任意键退出...")
-		var input string
-		fmt.Scanln(&input)
-		os.Exit(1)
+		fmt.Printf("警告: 前端目录不存在: %s\n", frontendDir)
+		fmt.Println("尝试使用当前工作目录...")
+		
+		currentDir, err := os.Getwd()
+		if err != nil {
+			fmt.Printf("错误: 无法获取当前目录: %v\n", err)
+			fmt.Println("按任意键退出...")
+			var input string
+			fmt.Scanln(&input)
+			os.Exit(1)
+		}
+		
+		frontendDir = filepath.Join(currentDir, "frontend")
+		fmt.Printf("尝试前端目录: %s\n", frontendDir)
+		log.Printf("尝试前端目录: %s", frontendDir)
+		
+		if _, err := os.Stat(frontendDir); os.IsNotExist(err) {
+			fmt.Printf("错误: 前端目录不存在: %s\n", frontendDir)
+			fmt.Println("请确保 frontend 文件夹与 knimg.exe 在同一目录")
+			fmt.Println("按任意键退出...")
+			var input string
+			fmt.Scanln(&input)
+			os.Exit(1)
+		}
 	}
 
-	frontendIndex := filepath.Join(baseDir, "frontend", "index.html")
+	frontendIndex := filepath.Join(frontendDir, "index.html")
 	fmt.Printf("前端index.html路径: %s\n", frontendIndex)
 	log.Printf("前端index.html路径: %s", frontendIndex)
 	if _, err := os.Stat(frontendIndex); os.IsNotExist(err) {

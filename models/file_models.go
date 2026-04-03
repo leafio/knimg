@@ -28,6 +28,7 @@ type CompressRequest struct {
 	Quality   int      `json:"quality"`
 	OutputDir string   `json:"output_dir"`
 	WorkDir   string   `json:"work_dir"` // 自定义工作目录
+	Overwrite bool     `json:"overwrite"` // 是否覆盖原文件
 }
 
 // CompressResponse 压缩响应

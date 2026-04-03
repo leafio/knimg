@@ -4,6 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KnImg - 文件管理与图片压缩工具</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -11,37 +14,252 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --primary: #4f46e5;
+            --primary-dark: #4338ca;
+            --secondary: #7c3aed;
+            --accent: #06b6d4;
+            --accent-dark: #0891b2;
+            --background: #f8fafc;
+            --surface: rgba(255, 255, 255, 0.8);
+            --surface-light: rgba(241, 245, 249, 0.8);
+            --text: #1e293b;
+            --text-secondary: #64748b;
+            --border: rgba(0, 0, 0, 0.1);
+            --glow: rgba(79, 70, 229, 0.5);
+            --glow-accent: rgba(6, 182, 212, 0.5);
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--background);
+            background-image: 
+                radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.1) 0%, transparent 20%),
+                radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.1) 0%, transparent 20%);
             min-height: 100vh;
             padding: 20px;
+            color: var(--text);
+        }
+
+        /* 顶部进度条 */
+        #topProgressBar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        #topProgressBar.active {
+            opacity: 1;
+        }
+
+        #topProgressBar .progress-bar-inner {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent) 0%, var(--accent-dark) 100%);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        /* Loading指示器 */
+        .loading-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: var(--surface-light);
+            backdrop-filter: blur(10px);
+            padding: 12px 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            display: none;
+            align-items: center;
+            gap: 10px;
+            z-index: 9998;
+            animation: slideIn 0.3s ease;
+        }
+
+        .loading-indicator.active {
+            display: flex;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .loading-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(0, 0, 0, 0.1);
+            border-top: 2px solid var(--accent);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 14px;
+            color: var(--text);
+            font-weight: 500;
+        }
+
+        /* 按钮loading状态 */
+        .btn.loading {
+            position: relative;
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        .btn.loading::after {
+            content: '';
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 8px;
         }
 
         .container {
             max-width: 1400px;
             margin: 0 auto;
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
             overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .container:hover {
+            box-shadow: 0 12px 40px rgba(79, 70, 229, 0.15);
         }
 
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             color: white;
-            padding: 30px;
-            text-align: center;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 20px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            animation: shine 3s infinite;
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        .header-content {
+            flex: 1;
+            min-width: 300px;
+            position: relative;
+            z-index: 1;
         }
 
         .header h1 {
-            font-size: 2em;
-            margin-bottom: 10px;
+            font-size: 1.8em;
+            margin-bottom: 5px;
+            font-weight: 600;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
         }
 
         .header p {
             opacity: 0.9;
-            font-size: 1.1em;
+            font-size: 0.9em;
+            text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-stats {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 8px 14px;
+            border-radius: 8px;
+            text-align: center;
+            min-width: 85px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .header-stat-card.stat-image {
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(8, 145, 178, 0.15) 100%);
+            border-color: rgba(6, 182, 212, 0.2);
+        }
+
+        .header-stat-card.stat-document {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.15) 100%);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .header-stat-card.stat-video {
+            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.15) 100%);
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .header-stat-card.stat-other {
+            background: linear-gradient(135deg, rgba(100, 116, 139, 0.15) 0%, rgba(71, 85, 105, 0.15) 100%);
+            border-color: rgba(100, 116, 139, 0.2);
+        }
+
+        .header-stat-card:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .header-stat-value {
+            font-size: 1.3em;
+            font-weight: bold;
+            margin-bottom: 2px;
+        }
+
+        .header-stat-label {
+            font-size: 0.7em;
+            opacity: 0.9;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .content {
@@ -50,10 +268,17 @@
 
         /* 筛选区域 */
         .filter-section {
-            background: #f7fafc;
+            background: var(--surface-light);
             padding: 20px;
-            border-radius: 8px;
+            border-radius: 12px;
             margin-bottom: 20px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .filter-section:hover {
+            box-shadow: 0 4px 20px rgba(79, 70, 229, 0.1);
+            border-color: rgba(79, 70, 229, 0.3);
         }
 
         .filter-row {
@@ -76,22 +301,26 @@
 
         .filter-group label {
             font-weight: 500;
-            color: #2d3748;
+            color: var(--text-secondary);
             white-space: nowrap;
         }
 
         .filter-group input,
         .filter-group select {
             padding: 8px 12px;
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border);
             border-radius: 6px;
             font-size: 14px;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--text);
+            transition: all 0.3s ease;
         }
 
         .filter-group input:focus,
         .filter-group select:focus {
             outline: none;
-            border-color: #667eea;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--glow-accent);
         }
 
         .search-input {
@@ -108,17 +337,38 @@
 
         .browse-btn {
             padding: 8px 12px;
-            background: #667eea;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             color: white;
             border: none;
             border-radius: 6px;
             cursor: pointer;
             font-size: 14px;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
         .browse-btn:hover {
-            background: #5568d3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .browse-btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .browse-btn:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         /* 工具栏 */
@@ -129,64 +379,95 @@
             flex-wrap: wrap;
             align-items: center;
             padding: 15px;
-            background: #f7fafc;
-            border-radius: 8px;
+            background: var(--surface-light);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .toolbar:hover {
+            box-shadow: 0 4px 20px rgba(79, 70, 229, 0.1);
+            border-color: rgba(79, 70, 229, 0.3);
         }
 
         .btn {
             padding: 10px 20px;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 14px;
             font-weight: 500;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         .btn-primary {
-            background: #667eea;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             color: white;
         }
 
         .btn-primary:hover {
-            background: #5568d3;
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
         }
 
         .btn-success {
-            background: #48bb78;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
             color: white;
         }
 
         .btn-success:hover {
-            background: #38a169;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
         }
 
         .btn-secondary {
-            background: #e2e8f0;
-            color: #2d3748;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--text);
+            border: 1px solid var(--border);
         }
 
         .btn-secondary:hover {
-            background: #cbd5e0;
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .quality-slider {
             display: flex;
             align-items: center;
             gap: 10px;
-            background: white;
+            background: rgba(255, 255, 255, 0.9);
             padding: 10px 15px;
-            border-radius: 6px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
         }
 
         .quality-slider label {
             font-weight: 500;
-            color: #2d3748;
+            color: var(--text-secondary);
             white-space: nowrap;
         }
 
@@ -194,7 +475,7 @@
             width: 120px;
             height: 6px;
             border-radius: 3px;
-            background: #e2e8f0;
+            background: rgba(0, 0, 0, 0.1);
             outline: none;
         }
 
@@ -202,74 +483,97 @@
             width: 16px;
             height: 16px;
             border-radius: 50%;
-            background: #667eea;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             cursor: pointer;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
         }
 
         .quality-value {
             min-width: 40px;
             text-align: center;
             font-weight: bold;
-            color: #667eea;
+            color: #6366f1;
         }
 
         /* 统计卡片 */
         .stats-cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 15px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+            gap: 10px;
+            margin-bottom: 15px;
         }
 
         .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             color: white;
-            padding: 20px;
-            border-radius: 8px;
+            padding: 12px;
+            border-radius: 6px;
             text-align: center;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
         }
 
         .stat-card-value {
-            font-size: 2em;
+            font-size: 1.5em;
             font-weight: bold;
-            margin-bottom: 5px;
+            margin-bottom: 3px;
         }
 
         .stat-card-label {
-            font-size: 0.9em;
+            font-size: 0.8em;
             opacity: 0.9;
         }
 
-        .stat-card.image { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-        .stat-card.document { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); }
-        .stat-card.video { background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%); }
-        .stat-card.other { background: linear-gradient(135deg, #718096 0%, #4a5568 100%); }
+        .stat-card.image { background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); box-shadow: 0 4px 12px rgba(6, 182, 212, 0.2); }
+        .stat-card.document { background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
+        .stat-card.video { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2); }
+        .stat-card.other { background: linear-gradient(135deg, #64748b 0%, #475569 100%); box-shadow: 0 4px 12px rgba(100, 116, 139, 0.2); }
 
         /* 文件列表 */
         .file-list {
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
+            border: 1px solid var(--border);
+            border-radius: 12px;
             overflow: hidden;
             max-height: 500px;
             overflow-y: auto;
+            background: var(--surface-light);
+        }
+
+        .file-list::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .file-list::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 3px;
+        }
+
+        .file-list::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+
+        .file-list::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
         }
 
         .file-list-header {
             display: flex;
             align-items: center;
             padding: 12px 20px;
-            background: #edf2f7;
-            border-bottom: 1px solid #e2e8f0;
+            background: rgba(241, 245, 249, 0.8);
+            border-bottom: 1px solid var(--border);
             font-weight: 600;
-            color: #2d3748;
+            color: var(--text);
         }
 
         .file-item {
             display: flex;
             align-items: center;
             padding: 12px 20px;
-            border-bottom: 1px solid #e2e8f0;
-            transition: background 0.2s;
+            border-bottom: 1px solid var(--border);
+            transition: all 0.3s ease;
+            position: relative;
+            background: rgba(255, 255, 255, 0.9);
         }
 
         .file-item:last-child {
@@ -277,7 +581,25 @@
         }
 
         .file-item:hover {
-            background: #f7fafc;
+            background: rgba(255, 255, 255, 1);
+            transform: translateX(5px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .file-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 3px;
+            height: 100%;
+            background: transparent;
+            transition: all 0.3s ease;
+        }
+
+        .file-item:hover::before {
+            background: #6366f1;
+            box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
         }
 
         .file-checkbox {
@@ -285,6 +607,7 @@
             width: 18px;
             height: 18px;
             cursor: pointer;
+            accent-color: #6366f1;
         }
 
         .file-info {
@@ -294,7 +617,7 @@
 
         .file-name {
             font-weight: 500;
-            color: #2d3748;
+            color: var(--text);
             margin-bottom: 4px;
             white-space: nowrap;
             overflow: hidden;
@@ -303,7 +626,7 @@
 
         .file-meta {
             font-size: 0.85em;
-            color: #718096;
+            color: var(--text-secondary);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -320,29 +643,29 @@
         }
 
         .type-image {
-            background: #bee3f8;
-            color: #2c5282;
+            background: rgba(6, 182, 212, 0.2);
+            color: #06b6d4;
         }
 
         .type-document {
-            background: #c6f6d5;
-            color: #22543d;
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
         }
 
         .type-video {
-            background: #feebc8;
-            color: #744210;
+            background: rgba(245, 158, 11, 0.2);
+            color: #f59e0b;
         }
 
         .type-other {
-            background: #e2e8f0;
-            color: #4a5568;
+            background: rgba(100, 116, 139, 0.2);
+            color: #64748b;
         }
 
         .file-size {
             min-width: 100px;
             text-align: right;
-            color: #4a5568;
+            color: var(--text-secondary);
             font-weight: 500;
         }
 
@@ -350,17 +673,18 @@
         .loading {
             text-align: center;
             padding: 40px;
-            color: #718096;
+            color: var(--text-secondary);
         }
 
         .spinner {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #667eea;
+            border: 3px solid rgba(0, 0, 0, 0.1);
+            border-top: 3px solid #6366f1;
             border-radius: 50%;
             width: 40px;
             height: 40px;
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
         }
 
         @keyframes spin {
@@ -371,38 +695,41 @@
         /* 消息提示 */
         .message {
             padding: 15px 20px;
-            border-radius: 6px;
+            border-radius: 8px;
             margin-bottom: 20px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.9);
         }
 
         .message-success {
-            background: #c6f6d5;
-            color: #22543d;
-            border-left: 4px solid #48bb78;
+            background: rgba(16, 185, 129, 0.1);
+            color: #10b981;
+            border-left: 4px solid #10b981;
         }
 
         .message-error {
-            background: #fed7d7;
-            color: #742a2a;
-            border-left: 4px solid #f56565;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            border-left: 4px solid #ef4444;
         }
 
         .message-info {
-            background: #bee3f8;
-            color: #2c5282;
-            border-left: 4px solid #4299e1;
+            background: rgba(6, 182, 212, 0.1);
+            color: #06b6d4;
+            border-left: 4px solid #06b6d4;
         }
 
         /* 空状态 */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
-            color: #718096;
+            color: var(--text-secondary);
         }
 
         .empty-state-icon {
             font-size: 4em;
             margin-bottom: 20px;
+            opacity: 0.5;
         }
 
         /* 导出按钮组 */
@@ -423,27 +750,48 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(10px);
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 1000;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .modal {
-            background: white;
-            border-radius: 12px;
+            background: var(--surface-light);
+            backdrop-filter: blur(20px);
+            border-radius: 16px;
             width: 90%;
             max-width: 600px;
             max-height: 80vh;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            border: 1px solid var(--border);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
         }
 
         .modal-header {
             padding: 20px;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -452,7 +800,7 @@
         .modal-title {
             font-size: 1.2em;
             font-weight: 600;
-            color: #2d3748;
+            color: var(--text);
         }
 
         .modal-close {
@@ -460,13 +808,15 @@
             border: none;
             font-size: 1.5em;
             cursor: pointer;
-            color: #718096;
+            color: var(--text-secondary);
             padding: 5px;
             line-height: 1;
+            transition: all 0.3s ease;
         }
 
         .modal-close:hover {
-            color: #2d3748;
+            color: var(--text);
+            transform: rotate(90deg);
         }
 
         .modal-body {
@@ -475,22 +825,38 @@
             flex: 1;
         }
 
+        .modal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .modal-body::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 3px;
+        }
+
+        .modal-body::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+
         .current-path {
-            background: #f7fafc;
+            background: rgba(255, 255, 255, 0.9);
             padding: 10px 15px;
             border-radius: 6px;
             margin-bottom: 15px;
             font-family: monospace;
             font-size: 0.9em;
-            color: #4a5568;
+            color: var(--text-secondary);
             word-break: break-all;
+            border: 1px solid var(--border);
         }
 
         .directory-list {
-            border: 1px solid #e2e8f0;
+            border: 1px solid var(--border);
             border-radius: 6px;
             max-height: 300px;
             overflow-y: auto;
+            background: rgba(255, 255, 255, 0.9);
         }
 
         .directory-item {
@@ -499,8 +865,8 @@
             align-items: center;
             gap: 10px;
             cursor: pointer;
-            transition: background 0.2s;
-            border-bottom: 1px solid #e2e8f0;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid var(--border);
         }
 
         .directory-item:last-child {
@@ -508,26 +874,28 @@
         }
 
         .directory-item:hover {
-            background: #f7fafc;
+            background: rgba(241, 245, 249, 1);
+            transform: translateX(5px);
         }
 
         .directory-item.parent {
-            background: #ebf8ff;
+            background: rgba(99, 102, 241, 0.1);
         }
 
         .directory-icon {
             font-size: 1.2em;
+            color: #6366f1;
         }
 
         .directory-name {
             flex: 1;
             font-weight: 500;
-            color: #2d3748;
+            color: var(--text);
         }
 
         .modal-footer {
             padding: 20px;
-            border-top: 1px solid #e2e8f0;
+            border-top: 1px solid var(--border);
             display: flex;
             gap: 10px;
             justify-content: flex-end;
@@ -535,36 +903,69 @@
 
         .btn-cancel {
             padding: 10px 20px;
-            background: #e2e8f0;
-            color: #2d3748;
-            border: none;
-            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--text);
+            border: 1px solid var(--border);
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
-            transition: background 0.2s;
+            transition: all 0.3s ease;
         }
 
         .btn-cancel:hover {
-            background: #cbd5e0;
+            background: rgba(255, 255, 255, 1);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         .btn-select {
             padding: 10px 20px;
-            background: #667eea;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
-            transition: background 0.2s;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
         }
 
         .btn-select:hover {
-            background: #5568d3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        .btn-select::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn-select:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         /* 响应式 */
         @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .header-stats {
+                width: 100%;
+                justify-content: space-around;
+            }
+
             .filter-row {
                 flex-direction: column;
                 align-items: stretch;
@@ -588,13 +989,61 @@
                 justify-content: center;
             }
         }
+
+        /* 压缩进度 */
+        #compressProgress {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+        }
+
+        #compressProgress div {
+            color: var(--text-secondary);
+        }
+
+        #progressBar {
+            background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%) !important;
+        }
     </style>
 </head>
 <body>
+    <!-- 顶部进度条 -->
+    <div id="topProgressBar">
+        <div class="progress-bar-inner"></div>
+    </div>
+
+    <!-- Loading指示器 -->
+    <div id="loadingIndicator" class="loading-indicator">
+        <div class="loading-spinner"></div>
+        <span class="loading-text" id="loadingText">加载中...</span>
+    </div>
+
     <div class="container">
         <div class="header">
-            <h1>🖼️ KnImg 文件管理</h1>
-            <p>智能文件管理与图片压缩工具</p>
+            <div class="header-content">
+                <h1>🖼️ KnImg 文件管理</h1>
+                <p>智能文件管理与图片压缩工具 <span id="loadedInfo" style="margin-left: 15px; opacity: 0.9;"></span></p>
+            </div>
+            <div class="header-stats" id="headerStats" style="display: none;">
+                <div class="header-stat-card stat-image">
+                    <div class="header-stat-value" id="headerStatImage">0</div>
+                    <div class="header-stat-label">图片</div>
+                </div>
+                <div class="header-stat-card stat-document">
+                    <div class="header-stat-value" id="headerStatDoc">0</div>
+                    <div class="header-stat-label">文档</div>
+                </div>
+                <div class="header-stat-card stat-video">
+                    <div class="header-stat-value" id="headerStatVideo">0</div>
+                    <div class="header-stat-label">视频</div>
+                </div>
+                <div class="header-stat-card stat-other">
+                    <div class="header-stat-value" id="headerStatOther">0</div>
+                    <div class="header-stat-label">其他</div>
+                </div>
+            </div>
         </div>
 
         <div class="content">
@@ -653,59 +1102,48 @@
                         <span>KB</span>
                     </div>
                     <button class="btn btn-secondary" onclick="clearFilters()">🔄 清除筛选</button>
+                    <button class="btn btn-primary" id="refreshBtn" onclick="loadFiles()">🔄 刷新列表</button>
                 </div>
             </div>
 
-            <!-- 统计卡片 -->
-            <div class="stats-cards" id="statsCards" style="display: none;">
-                <div class="stat-card image">
-                    <div class="stat-card-value" id="statImage">0</div>
-                    <div class="stat-card-label">图片文件</div>
-                </div>
-                <div class="stat-card document">
-                    <div class="stat-card-value" id="statDoc">0</div>
-                    <div class="stat-card-label">文档文件</div>
-                </div>
-                <div class="stat-card video">
-                    <div class="stat-card-value" id="statVideo">0</div>
-                    <div class="stat-card-label">视频文件</div>
-                </div>
-                <div class="stat-card other">
-                    <div class="stat-card-value" id="statOther">0</div>
-                    <div class="stat-card-label">其他文件</div>
-                </div>
-            </div>
+
 
             <!-- 工具栏 -->
             <div class="toolbar">
-                <button class="btn btn-primary" onclick="loadFiles()">
-                    🔄 刷新列表
-                </button>
-
                 <div class="quality-slider">
                     <label>压缩质量:</label>
                     <input type="range" id="quality" min="10" max="100" value="80">
                     <span class="quality-value" id="qualityValue">80%</span>
                 </div>
 
-                <button class="btn btn-success" onclick="compressFiles()">
+                <div class="filter-group">
+                    <input type="checkbox" id="overwrite" style="margin-right: 8px;">
+                    <label for="overwrite">覆盖原文件</label>
+                </div>
+
+                <button class="btn btn-success" id="compressBtn" onclick="compressFiles()">
                     🗜️ 压缩选中
                 </button>
 
-                <div class="filter-group">
-                    <label>📤 导出目录:</label>
-                    <input type="text" id="exportDir" class="dir-input" placeholder="输入导出文件存储路径">
-                    <button class="browse-btn" onclick="openDirectoryBrowser('exportDir')">📁 浏览</button>
+                <!-- 压缩进度 -->
+                <div id="compressProgress" style="display: none; margin-left: 15px; flex: 1;">
+                    <div style="font-size: 14px; margin-bottom: 5px; color: #667eea;">压缩进度</div>
+                    <div style="width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
+                        <div id="progressBar" style="height: 100%; background: #667eea; width: 0%; transition: width 0.3s ease;"></div>
+                    </div>
+                    <div id="progressText" style="font-size: 12px; color: #718096; margin-top: 5px;">0%</div>
                 </div>
 
+
+
                 <div class="export-group">
-                    <button class="btn btn-secondary" onclick="exportFiles('excel')">
+                    <button class="btn btn-secondary" id="exportExcelBtn" onclick="exportFiles('excel')">
                         📊 Excel
                     </button>
-                    <button class="btn btn-secondary" onclick="exportFiles('csv')">
+                    <button class="btn btn-secondary" id="exportCsvBtn" onclick="exportFiles('csv')">
                         📄 CSV
                     </button>
-                    <button class="btn btn-secondary" onclick="exportFiles('json')">
+                    <button class="btn btn-secondary" id="exportJsonBtn" onclick="exportFiles('json')">
                         📋 JSON
                     </button>
                 </div>
@@ -744,11 +1182,44 @@
         let filteredFiles = [];
         let currentBrowsePath = '';
         let activeDirectoryInput = null;
+        let currentExportFormat = null;
+        let isLoading = false;
 
         // 质量滑块事件
         document.getElementById('quality').addEventListener('input', function() {
             document.getElementById('qualityValue').textContent = this.value + '%';
         });
+
+        // 显示loading
+        function showLoading(text = '加载中...') {
+            isLoading = true;
+            document.getElementById('loadingText').textContent = text;
+            document.getElementById('loadingIndicator').classList.add('active');
+            document.getElementById('topProgressBar').classList.add('active');
+            document.getElementById('topProgressBar').querySelector('.progress-bar-inner').style.width = '0%';
+        }
+
+        // 隐藏loading
+        function hideLoading() {
+            isLoading = false;
+            document.getElementById('loadingIndicator').classList.remove('active');
+            document.getElementById('topProgressBar').classList.remove('active');
+        }
+
+        // 更新进度
+        function updateProgress(percent) {
+            document.getElementById('topProgressBar').querySelector('.progress-bar-inner').style.width = percent + '%';
+        }
+
+        // 设置按钮loading状态
+        function setButtonLoading(buttonId, loading) {
+            const button = document.getElementById(buttonId);
+            if (loading) {
+                button.classList.add('loading');
+            } else {
+                button.classList.remove('loading');
+            }
+        }
 
         // 打开文件夹浏览器
         async function openDirectoryBrowser(inputId) {
@@ -813,8 +1284,15 @@
         // 选择目录
         function selectDirectory() {
             if (activeDirectoryInput && currentBrowsePath) {
-                document.getElementById(activeDirectoryInput).value = currentBrowsePath;
-                closeDirectoryBrowser();
+                if (activeDirectoryInput === 'export') {
+                    // 处理导出目录选择
+                    closeDirectoryBrowser();
+                    performExport(currentBrowsePath);
+                } else {
+                    // 处理其他目录选择
+                    document.getElementById(activeDirectoryInput).value = currentBrowsePath;
+                    closeDirectoryBrowser();
+                }
             }
         }
 
@@ -828,25 +1306,36 @@
         // 加载文件列表
         async function loadFiles() {
             try {
-                showMessage('正在加载文件列表...', 'info');
+                setButtonLoading('refreshBtn', true);
+                showLoading('正在加载文件列表...');
+                updateProgress(30);
                 
                 const workDir = document.getElementById('workDir').value;
                 const params = new URLSearchParams();
                 if (workDir) params.append('work_dir', workDir);
                 
+                updateProgress(50);
                 const response = await fetch('/api/files?' + params.toString());
                 const data = await response.json();
 
+                updateProgress(80);
                 if (data.success) {
                     allFiles = data.data;
                     updateStats(data.stats);
                     applyFilters();
-                    showMessage(`成功加载 ${allFiles.length} 个文件`, 'success');
+                    document.getElementById('loadedInfo').textContent = `已加载 ${allFiles.length} 个文件`;
                 } else {
                     showMessage('加载失败：' + data.message, 'error');
                 }
+                
+                updateProgress(100);
             } catch (error) {
                 showMessage('加载失败：' + error.message, 'error');
+            } finally {
+                setTimeout(() => {
+                    setButtonLoading('refreshBtn', false);
+                    hideLoading();
+                }, 300);
             }
         }
 
@@ -912,11 +1401,11 @@
         function updateStats(stats) {
             if (!stats) return;
 
-            document.getElementById('statsCards').style.display = 'grid';
-            document.getElementById('statImage').textContent = stats.image_count || 0;
-            document.getElementById('statDoc').textContent = stats.doc_count || 0;
-            document.getElementById('statVideo').textContent = stats.video_count || 0;
-            document.getElementById('statOther').textContent = stats.other_count || 0;
+            document.getElementById('headerStats').style.display = 'flex';
+            document.getElementById('headerStatImage').textContent = stats.image_count || 0;
+            document.getElementById('headerStatDoc').textContent = stats.doc_count || 0;
+            document.getElementById('headerStatVideo').textContent = stats.video_count || 0;
+            document.getElementById('headerStatOther').textContent = stats.other_count || 0;
         }
 
         // 渲染文件列表
@@ -1008,8 +1497,18 @@
             const quality = parseInt(document.getElementById('quality').value);
             const filePaths = selectedFiles.map(f => f.path);
             const workDir = document.getElementById('workDir').value;
+            const overwrite = document.getElementById('overwrite').checked;
 
-            showMessage(`正在压缩 ${selectedFiles.length} 个文件...`, 'info');
+            // 显示进度条
+            const progressContainer = document.getElementById('compressProgress');
+            const progressBar = document.getElementById('progressBar');
+            const progressText = document.getElementById('progressText');
+            progressContainer.style.display = 'block';
+            progressBar.style.width = '0%';
+            progressText.textContent = '0%';
+
+            setButtonLoading('compressBtn', true);
+            showLoading(`正在压缩 ${selectedFiles.length} 个文件...`);
 
             try {
                 const response = await fetch('/api/compress', {
@@ -1020,28 +1519,100 @@
                     body: JSON.stringify({
                         files: filePaths,
                         quality: quality,
-                        work_dir: workDir
+                        work_dir: workDir,
+                        overwrite: overwrite
                     })
                 });
 
-                const data = await response.json();
+                // 处理流式响应
+                if (response.ok) {
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = '';
 
-                if (data.success) {
-                    let message = `${data.message} | 压缩率：${data.ratio}`;
-                    if (data.failed_count > 0) {
-                        message += ` | 失败：${data.failed_count} 个`;
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+
+                        buffer += decoder.decode(value, { stream: true });
+                        
+                        // 处理进度更新
+                        const lines = buffer.split('\n');
+                        for (const line of lines) {
+                            if (line.startsWith('progress:')) {
+                                const progress = parseInt(line.split(':')[1].trim());
+                                if (!isNaN(progress)) {
+                                    progressBar.style.width = progress + '%';
+                                    progressText.textContent = progress + '%';
+                                    updateProgress(progress);
+                                }
+                            } else if (line.startsWith('data:')) {
+                                try {
+                                    const data = JSON.parse(line.substring(5));
+                                    if (data.success) {
+                                        let message = `${data.message} | 压缩率：${data.ratio}`;
+                                        if (data.failed_count > 0) {
+                                            message += ` | 失败：${data.failed_count} 个`;
+                                        }
+                                        showMessage(message, 'success');
+                                    } else {
+                                        showMessage('压缩失败：' + data.message, 'error');
+                                    }
+                                } catch (e) {
+                                    console.error('解析响应失败:', e);
+                                }
+                            }
+                        }
+                        
+                        buffer = lines[lines.length - 1];
                     }
-                    showMessage(message, 'success');
                 } else {
+                    const data = await response.json();
                     showMessage('压缩失败：' + data.message, 'error');
                 }
             } catch (error) {
                 showMessage('压缩失败：' + error.message, 'error');
+            } finally {
+                // 隐藏进度条
+                setTimeout(() => {
+                    progressContainer.style.display = 'none';
+                    setButtonLoading('compressBtn', false);
+                    hideLoading();
+                }, 2000);
             }
         }
 
         // 导出文件
-        async function exportFiles(format) {
+        function exportFiles(format) {
+            // 保存当前导出格式
+            currentExportFormat = format;
+            
+            // 打开文件夹选择弹窗
+            openExportDirectoryBrowser();
+        }
+
+        // 打开导出文件夹选择弹窗
+        async function openExportDirectoryBrowser() {
+            activeDirectoryInput = 'export';
+            document.getElementById('modalTitle').textContent = '选择导出目录';
+            
+            // 从用户主目录开始浏览
+            await browseDirectory('');
+            
+            document.getElementById('directoryModal').style.display = 'flex';
+        }
+
+        // 执行导出操作
+        async function performExport(exportDir) {
+            const format = currentExportFormat;
+            if (!format) return;
+
+            const buttonId = format === 'excel' ? 'exportExcelBtn' : 
+                            format === 'csv' ? 'exportCsvBtn' : 'exportJsonBtn';
+            
+            setButtonLoading(buttonId, true);
+            showLoading(`正在导出 ${format.toUpperCase()} 文件...`);
+
             // 获取当前筛选参数
             const search = document.getElementById('searchInput').value;
             const fileType = document.getElementById('typeFilter').value;
@@ -1049,7 +1620,6 @@
             const minSizeKB = parseFloat(document.getElementById('minSize').value) || 0;
             const maxSizeKB = parseFloat(document.getElementById('maxSize').value) || 0;
             const workDir = document.getElementById('workDir').value;
-            const exportDir = document.getElementById('exportDir').value;
 
             const params = new URLSearchParams();
             params.append('format', format);
@@ -1062,10 +1632,11 @@
             if (maxSizeKB > 0) params.append('max_size', maxSizeKB * 1024);
 
             try {
-                showMessage(`正在导出 ${format.toUpperCase()} 文件...`, 'info');
+                updateProgress(50);
                 const response = await fetch('/api/files/export?' + params.toString());
                 const data = await response.json();
 
+                updateProgress(100);
                 if (data.success) {
                     showMessage(`导出成功：${data.file_path}`, 'success');
                 } else {
@@ -1073,6 +1644,12 @@
                 }
             } catch (error) {
                 showMessage('导出失败：' + error.message, 'error');
+            } finally {
+                setTimeout(() => {
+                    setButtonLoading(buttonId, false);
+                    hideLoading();
+                    currentExportFormat = null;
+                }, 300);
             }
         }
 
