@@ -29,8 +29,14 @@ jobs:
       - name: Install dependencies (Ubuntu)
         if: matrix.os == 'ubuntu-latest'
         run: |
-          sudo apt-get update
-          sudo apt-get install -y libgtk-3-dev libwebkit2gtk-4.0-dev libjavascriptcoregtk-4.0-dev libgtk-3-dev
+          sudo apt-get update -y
+          sudo apt-get install -y -qq libgtk-3-dev libwebkit2gtk-4.0-dev libjavascriptcoregtk-4.0-dev libgdk-pixbuf2.0-dev libcairo2-dev libpango1.0-dev libatk1.0-dev
+          # 检查依赖安装情况
+          dpkg -l | grep -E 'libgtk|webkit|javascriptcore'
+          # 检查Go版本
+          go version
+          # 检查Go环境
+          go env
 
       - name: Build
         run: |
