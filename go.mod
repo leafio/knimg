@@ -5,6 +5,7 @@ go 1.21
 require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/tealeg/xlsx/v3 v3.3.9
+	github.com/webview/webview_go v0.0.0-20240831120633-6173450d4dd6
 )
 
 require (

@@ -11,6 +11,7 @@ import (
 	"knimg/handlers"
 
 	"github.com/gin-gonic/gin"
+	webview "github.com/webview/webview_go"
 )
 
 func main() {
@@ -201,7 +202,20 @@ func main() {
 	fmt.Printf("📁 工作目录：%s\n", baseDir)
 	fmt.Printf("📤 上传目录：%s\n", uploadDir)
 
-	if err := r.Run(":" + port); err != nil {
-		log.Fatalf("服务器启动失败: %v", err)
-	}
+	// 创建WebView窗口
+	w := webview.New(false)
+	defer w.Destroy()
+	w.SetTitle("KnImg")
+	w.SetSize(1024, 768, webview.HintNone)
+	w.Navigate(fmt.Sprintf("http://localhost:%s", port))
+
+	// 在goroutine中启动服务器
+	go func() {
+		if err := r.Run(":" + port); err != nil {
+			log.Fatalf("服务器启动失败: %v", err)
+		}
+	}()
+
+	// 运行WebView主循环
+	w.Run()
 }
