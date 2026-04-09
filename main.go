@@ -136,50 +136,9 @@ func main() {
 		api.GET("/compress/stats", compressHandler.GetCompressionStats)
 	}
 
-	// 检查前端目录
-	frontendDir := filepath.Join(baseDir, "frontend")
-	fmt.Printf("前端目录: %s\n", frontendDir)
-	log.Printf("前端目录: %s", frontendDir)
-	
-	// 如果前端目录不存在，尝试使用当前工作目录
-	if _, err := os.Stat(frontendDir); os.IsNotExist(err) {
-		fmt.Printf("警告: 前端目录不存在: %s\n", frontendDir)
-		fmt.Println("尝试使用当前工作目录...")
-		
-		currentDir, err := os.Getwd()
-		if err != nil {
-			fmt.Printf("错误: 无法获取当前目录: %v\n", err)
-			fmt.Println("按任意键退出...")
-			var input string
-			fmt.Scanln(&input)
-			os.Exit(1)
-		}
-		
-		frontendDir = filepath.Join(currentDir, "frontend")
-		fmt.Printf("尝试前端目录: %s\n", frontendDir)
-		log.Printf("尝试前端目录: %s", frontendDir)
-		
-		if _, err := os.Stat(frontendDir); os.IsNotExist(err) {
-			fmt.Printf("错误: 前端目录不存在: %s\n", frontendDir)
-			fmt.Println("请确保 frontend 文件夹与 knimg.exe 在同一目录")
-			fmt.Println("按任意键退出...")
-			var input string
-			fmt.Scanln(&input)
-			os.Exit(1)
-		}
-	}
-
-	frontendIndex := filepath.Join(frontendDir, "index.html")
-	fmt.Printf("前端index.html路径: %s\n", frontendIndex)
-	log.Printf("前端index.html路径: %s", frontendIndex)
-	if _, err := os.Stat(frontendIndex); os.IsNotExist(err) {
-		fmt.Printf("错误: 前端index.html文件不存在: %s\n", frontendIndex)
-		fmt.Println("请确保 frontend/index.html 文件存在")
-		fmt.Println("按任意键退出...")
-		var input string
-		fmt.Scanln(&input)
-		os.Exit(1)
-	}
+	// 使用嵌入的前端资源
+	fmt.Println("✓ 前端资源加载成功")
+	log.Println("✓ 前端资源加载成功")
 
 	// 静态文件服务
 	r.Static("/uploads", uploadDir)
@@ -189,7 +148,11 @@ func main() {
 		log.Fatalf("无法创建压缩目录: %v", err)
 	}
 	r.Static("/compressed", compressedDir)
-	r.StaticFile("/", frontendIndex)
+	
+	// 提供嵌入的前端index.html
+	r.GET("/", func(c *gin.Context) {
+		c.Data(200, "text/html; charset=utf-8", indexHTMLContent)
+	})
 
 	// 启动服务器
 	port := "8080"
