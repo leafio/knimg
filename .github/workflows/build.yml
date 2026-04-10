@@ -95,70 +95,102 @@ jobs:
           export CGO_ENABLED=1
           echo "CGO_ENABLED=$CGO_ENABLED"
 
-      - name: Build
+      - name: Build (Windows)
+        if: matrix.os == 'windows-latest'
+        shell: pwsh
+        run: |
+          Write-Host "=== 开始构建 ==="
+          Write-Host "操作系统: ${{ matrix.os }}"
+          Write-Host "Go 版本: $(go version)"
+          Write-Host "CGO_ENABLED: $(go env CGO_ENABLED)"
+          
+          # 确保 CGO 启用
+          $env:CGO_ENABLED = 1
+          
+          Write-Host "构建 Windows 版本..."
+          go build -v -ldflags="-s -w" -o knimg-windows-amd64.exe .
+          
+          # 检查构建结果
+          Write-Host "\n=== 构建产物 ==="
+          Get-ChildItem knimg-* -ErrorAction SilentlyContinue | Format-Table
+          if (-not (Test-Path "knimg-windows-amd64.exe")) {
+              Write-Host "警告: 未找到构建文件"
+          }
+
+      - name: Build (macOS)
+        if: matrix.os == 'macos-latest'
+        shell: bash
         run: |
           echo "=== 开始构建 ==="
           echo "操作系统: ${{ matrix.os }}"
           echo "Go 版本: $(go version)"
           echo "CGO_ENABLED: $(go env CGO_ENABLED)"
           
-          # 确保 CGO 启用（Linux 需要）
+          # 确保 CGO 启用
           export CGO_ENABLED=1
           
-          if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            echo "构建 Windows 版本..."
-            go build -v -ldflags="-s -w" -o knimg-windows-amd64.exe .
-            
-          elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-            echo "构建 macOS AMD64 版本..."
-            go build -v -ldflags="-s -w" -o knimg-darwin-amd64 .
-            
-            echo "构建 macOS ARM64 版本..."
-            GOARCH=arm64 go build -v -ldflags="-s -w" -o knimg-darwin-arm64 .
-            
+          echo "构建 macOS AMD64 版本..."
+          go build -v -ldflags="-s -w" -o knimg-darwin-amd64 .
+          
+          echo "构建 macOS ARM64 版本..."
+          GOARCH=arm64 go build -v -ldflags="-s -w" -o knimg-darwin-arm64 .
+          
+          # 检查构建结果
+          echo "\n=== 构建产物 ==="
+          ls -lh knimg-* 2>/dev/null || echo "警告: 未找到构建文件"
+
+      - name: Build (Linux)
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
+        run: |
+          echo "=== 开始构建 ==="
+          echo "操作系统: ${{ matrix.os }}"
+          echo "Go 版本: $(go version)"
+          echo "CGO_ENABLED: $(go env CGO_ENABLED)"
+          
+          # 确保 CGO 启用
+          export CGO_ENABLED=1
+          
+          echo "构建 Linux 版本..."
+          echo "检查必要的库..."
+          
+          # 验证 GTK3
+          if pkg-config --exists gtk+-3.0; then
+            echo "✓ 找到 gtk+-3.0"
           else
-            echo "构建 Linux 版本..."
-            echo "检查必要的库..."
-            
-            # 验证 GTK3
-            if pkg-config --exists gtk+-3.0; then
-              echo "✓ 找到 gtk+-3.0"
-            else
-              echo "⚠ 警告: gtk+-3.0 未找到，尝试继续构建..."
+            echo "⚠ 警告: gtk+-3.0 未找到，尝试继续构建..."
+          fi
+          
+          # 验证 WebKitGTK (尝试多个版本)
+          webkit_found=false
+          for webkit_pkg in webkit2gtk-4.1 webkit2gtk-4.0 webkitgtk-6.0 webkitgtk-3.0; do
+            if pkg-config --exists $webkit_pkg; then
+              echo "✓ 找到 $webkit_pkg"
+              webkit_found=true
+              break
             fi
-            
-            # 验证 WebKitGTK (尝试多个版本)
-            webkit_found=false
-            for webkit_pkg in webkit2gtk-4.1 webkit2gtk-4.0 webkitgtk-6.0 webkitgtk-3.0; do
-              if pkg-config --exists $webkit_pkg; then
-                echo "✓ 找到 $webkit_pkg"
-                webkit_found=true
-                break
-              fi
-            done
-            
-            if [ "$webkit_found" = "false" ]; then
-              echo "⚠ 警告: 未找到 webkit 包，尝试继续构建..."
-              dpkg -l | grep webkit || echo "无 webkit 包"
-            fi
-            
-            # 执行构建
-            echo "开始编译..."
-            export CGO_ENABLED=1
-            
-            # 尝试构建，即使缺少某些依赖
+          done
+          
+          if [ "$webkit_found" = "false" ]; then
+            echo "⚠ 警告: 未找到 webkit 包，尝试继续构建..."
+            dpkg -l | grep webkit || echo "无 webkit 包"
+          fi
+          
+          # 执行构建
+          echo "开始编译..."
+          
+          # 尝试构建，即使缺少某些依赖
+          if go build -v -ldflags="-s -w" -o knimg-linux-amd64 .; then
+            echo "✓ Linux 构建成功"
+          else
+            echo "⚠ 构建失败，尝试禁用 CGO..."
+            # 尝试禁用 CGO
+            export CGO_ENABLED=0
             if go build -v -ldflags="-s -w" -o knimg-linux-amd64 .; then
-              echo "✓ Linux 构建成功"
+              echo "✓ Linux 构建成功 (禁用 CGO)"
             else
-              echo "⚠ 构建失败，尝试禁用 CGO..."
-              # 尝试禁用 CGO
-              export CGO_ENABLED=0
-              if go build -v -ldflags="-s -w" -o knimg-linux-amd64 .; then
-                echo "✓ Linux 构建成功 (禁用 CGO)"
-              else
-                echo "✗ 所有构建尝试失败"
-                # 不退出，让工作流继续
-              fi
+              echo "✗ 所有构建尝试失败"
+              # 不退出，让工作流继续
             fi
           fi
           
