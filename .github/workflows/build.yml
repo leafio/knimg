@@ -258,6 +258,22 @@ jobs:
             fi
           fi
           
+          # 创建 Linux 桌面条目文件
+          echo "\n=== 创建 Linux 桌面条目文件 ==="
+          cat > knimg.desktop << EOF
+          [Desktop Entry]
+          Name=KnImg
+          Exec=./knimg-linux-amd64
+          Terminal=false
+          Type=Application
+          Categories=Utility;
+          EOF
+          chmod +x knimg.desktop
+          
+          # 压缩所有文件
+          echo "\n=== 压缩 Linux 构建产物 ==="
+          zip -r knimg-linux.zip knimg-linux-amd64 knimg.desktop
+          
           # 检查构建结果
           echo "\n=== 构建产物 ==="
           ls -lh knimg-* 2>/dev/null || echo "警告: 未找到构建文件"
@@ -271,6 +287,7 @@ jobs:
             knimg-*-amd64
             knimg-*-arm64
             knimg-*.app.zip
+            knimg-*.zip
 
   release:
     needs: build
@@ -291,5 +308,6 @@ jobs:
             artifacts/**/knimg-*-amd64
             artifacts/**/knimg-*-arm64
             artifacts/**/knimg-*.app.zip
+            artifacts/**/knimg-*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
