@@ -1,4 +1,4 @@
-//go:build !dev
+//go:build dev
 
 package main
 
@@ -7,7 +7,6 @@ import (
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 	"time"
 
 	"knimg/handlers"
@@ -18,7 +17,7 @@ import (
 
 func main() {
 	// 先输出到控制台
-	fmt.Println("=== KnImg 启动 ===")
+	fmt.Println("=== KnImg 启动 (开发模式) ===")
 	fmt.Println("启动时间:", time.Now().Format("2006-01-02 15:04:05"))
 
 	// 尝试创建日志文件
@@ -35,7 +34,7 @@ func main() {
 	}
 
 	// 记录启动信息
-	log.Println("=== KnImg 启动 ===")
+	log.Println("=== KnImg 启动 (开发模式) ===")
 	log.Println("启动时间:", time.Now().Format("2006-01-02 15:04:05"))
 
 	var baseDir string
@@ -61,24 +60,10 @@ func main() {
 		fmt.Printf("可执行文件路径: %s\n", execPath)
 		log.Printf("可执行文件路径: %s", execPath)
 
-		execDir := filepath.Dir(execPath)
-		
-		// 检查是否在临时目录中运行（开发模式）
-		isDevMode := true || strings.Contains(execPath, "go-build") || 
-		             strings.Contains(execPath, "/Temp/") ||
-		             strings.Contains(execPath, "\\Temp\\")
-		
-		if isDevMode {
-			// 开发模式：使用当前工作目录
-			baseDir = currentDir
-			fmt.Printf("开发模式 - 使用当前工作目录: %s\n", baseDir)
-			log.Printf("开发模式 - 使用当前工作目录: %s", baseDir)
-		} else {
-			// 生产模式：使用可执行文件目录
-			baseDir = execDir
-			fmt.Printf("生产模式 - 使用可执行文件目录: %s\n", baseDir)
-			log.Printf("生产模式 - 使用可执行文件目录: %s", baseDir)
-		}
+		// 开发模式：使用当前工作目录
+		baseDir = currentDir
+		fmt.Printf("开发模式 - 使用当前工作目录: %s\n", baseDir)
+		log.Printf("开发模式 - 使用当前工作目录: %s", baseDir)
 	}
 
 	// 确保目录存在
@@ -118,7 +103,7 @@ func main() {
 		}
 	})
 
-	// API 路由
+	// API 路由（先注册，更具体的路径）
 	api := r.Group("/api")
 	{
 		// 文件列表
@@ -146,33 +131,22 @@ func main() {
 		log.Fatalf("无法创建压缩目录: %v", err)
 	}
 	r.Static("/compressed", compressedDir)
+
+	// 开发模式：使用本地前端目录
+	frontendDir := filepath.Join(baseDir, "frontend")
+	log.Printf("开发模式 - 使用本地前端目录: %s", frontendDir)
+	fmt.Printf("开发模式 - 使用本地前端目录: %s\n", frontendDir)
 	
-	// 检查是否为开发模式
-	isDevMode := true || strings.Contains(execPath, "go-build") || 
-	             strings.Contains(execPath, "/Temp/") ||
-	             strings.Contains(execPath, "\\Temp\\")
+	// 提供前端静态文件（使用/frontend路径，避免与/api冲突）
+	r.Static("/frontend", frontendDir)
 	
-	if isDevMode {
-		// 开发模式：使用本地前端目录
-		frontendDir := filepath.Join(baseDir, "frontend")
-		log.Printf("开发模式 - 使用本地前端目录: %s", frontendDir)
-		fmt.Printf("开发模式 - 使用本地前端目录: %s\n", frontendDir)
-		
-		// 提供前端静态文件
-		r.Static("/", frontendDir)
-		fmt.Println("✓ 本地前端资源加载成功")
-		log.Println("✓ 本地前端资源加载成功")
-	} else {
-		// 生产模式：使用嵌入的前端资源
-		fmt.Println("✓ 嵌入前端资源加载成功")
-		log.Println("✓ 嵌入前端资源加载成功")
-		
-		// 提供嵌入的前端index.html
-		r.GET("/", func(c *gin.Context) {
-			// 生产模式下会使用嵌入的资源
-			c.Data(200, "text/html; charset=utf-8", indexHTMLContent)
-		})
-	}
+	// 重定向根路径到/frontend
+	r.GET("/", func(c *gin.Context) {
+		c.Redirect(302, "/frontend")
+	})
+	
+	fmt.Println("✓ 本地前端资源加载成功")
+	log.Println("✓ 本地前端资源加载成功")
 
 	// 启动服务器
 	port := "8080"
@@ -188,9 +162,9 @@ func main() {
 	// 创建WebView窗口
 	w := webview.New(false)
 	defer w.Destroy()
-	w.SetTitle("KnImg")
+	w.SetTitle("KnImg (开发模式)")
 	w.SetSize(1024, 768, webview.HintNone)
-	w.Navigate(fmt.Sprintf("http://localhost:%s", port))
+	w.Navigate(fmt.Sprintf("http://localhost:%s/frontend", port))
 
 	// 在goroutine中启动服务器
 	go func() {
