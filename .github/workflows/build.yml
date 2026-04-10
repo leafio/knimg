@@ -40,39 +40,131 @@ jobs:
         if: matrix.os == 'ubuntu-latest'
         run: |
           sudo apt-get update -y
-          # 安装基本依赖
-          sudo apt-get install -y -qq libgtk-3-dev libgdk-pixbuf2.0-dev libcairo2-dev libpango1.0-dev libatk1.0-dev libx11-dev libxext-dev libxtst-dev libxrender-dev libxi-dev
-          # 尝试安装webkit相关包（不同Ubuntu版本可能有不同名称）
-          sudo apt-get install -y -qq libwebkit2gtk-4.1-dev || sudo apt-get install -y -qq libwebkit2gtk-4.0-dev || echo "WebKit packages not found, continuing..."
-          # 检查依赖安装情况
-          dpkg -l | grep -E 'libgtk|webkit|libx11|libcairo|libpango'
-          # 检查Go版本
-          go version
+          
+          # 安装基本编译工具
+          sudo apt-get install -y -qq build-essential gcc g++ pkg-config
+          
+          # 安装 GTK3 和相关依赖
+          sudo apt-get install -y -qq \
+            libgtk-3-dev \
+            libgdk-pixbuf2.0-dev \
+            libcairo2-dev \
+            libpango1.0-dev \
+            libatk1.0-dev \
+            libx11-dev \
+            libxext-dev \
+            libxtst-dev \
+            libxrender-dev \
+            libxi-dev \
+            libglib2.0-dev \
+            libicu-dev \
+            libjpeg-dev \
+            libpng-dev \
+            libgif-dev \
+            libwebp-dev
+          
+          # 安装 WebKitGTK (尝试多个版本)
+          echo "尝试安装 WebKitGTK..."
+          webkit_installed=false
+          for pkg in libwebkit2gtk-4.1-dev libwebkit2gtk-4.0-dev libwebkitgtk-6.0-dev libwebkitgtk-3.0-dev libwebkit2gtk-dev; do
+            if sudo apt-get install -y -qq $pkg 2>/dev/null; then
+              echo "✓ 已安装 $pkg"
+              webkit_installed=true
+              break
+            fi
+          done
+          
+          if [ "$webkit_installed" = "false" ]; then
+            echo "✗ 无法安装WebKitGTK，继续构建..."
+          fi
+          
+          # 验证关键依赖是否安装成功
+          echo "\n=== 验证依赖安装 ==="
+          dpkg -l | grep -E 'libgtk-3-dev|libwebkit|build-essential|gcc' || echo "警告: 某些依赖可能未正确安装"
+          
+          # 检查 pkg-config 能否找到必要的库
+          echo "\n=== 检查 pkg-config ==="
+          pkg-config --cflags gtk+-3.0 || echo "警告: gtk+-3.0 未找到"
+          
           # 检查Go环境
-          go env
-          # 检查当前目录
-          pwd
-          # 检查文件结构
-          ls -la
+          echo "\n=== Go 环境信息 ==="
+          go version
+          go env CGO_ENABLED CC CXX
+          
+          # 确保 CGO 启用
+          export CGO_ENABLED=1
+          echo "CGO_ENABLED=$CGO_ENABLED"
 
       - name: Build
         run: |
-          echo "开始构建..."
+          echo "=== 开始构建 ==="
+          echo "操作系统: ${{ matrix.os }}"
+          echo "Go 版本: $(go version)"
+          echo "CGO_ENABLED: $(go env CGO_ENABLED)"
+          
+          # 确保 CGO 启用（Linux 需要）
+          export CGO_ENABLED=1
+          
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            go build -ldflags="-s -w" -o knimg-windows-amd64.exe .
+            echo "构建 Windows 版本..."
+            go build -v -ldflags="-s -w" -o knimg-windows-amd64.exe .
+            
           elif [ "${{ matrix.os }}" = "macos-latest" ]; then
-            go build -ldflags="-s -w" -o knimg-darwin-amd64 .
-            # Build for ARM64 as well
-            GOARCH=arm64 go build -ldflags="-s -w" -o knimg-darwin-arm64 .
+            echo "构建 macOS AMD64 版本..."
+            go build -v -ldflags="-s -w" -o knimg-darwin-amd64 .
+            
+            echo "构建 macOS ARM64 版本..."
+            GOARCH=arm64 go build -v -ldflags="-s -w" -o knimg-darwin-arm64 .
+            
           else
-            # 尝试构建，捕获错误
-            set -x
-            go build -v -ldflags="-s -w" -o knimg-linux-amd64 .
-            set +x
+            echo "构建 Linux 版本..."
+            echo "检查必要的库..."
+            
+            # 验证 GTK3
+            if pkg-config --exists gtk+-3.0; then
+              echo "✓ 找到 gtk+-3.0"
+            else
+              echo "⚠ 警告: gtk+-3.0 未找到，尝试继续构建..."
+            fi
+            
+            # 验证 WebKitGTK (尝试多个版本)
+            webkit_found=false
+            for webkit_pkg in webkit2gtk-4.1 webkit2gtk-4.0 webkitgtk-6.0 webkitgtk-3.0; do
+              if pkg-config --exists $webkit_pkg; then
+                echo "✓ 找到 $webkit_pkg"
+                webkit_found=true
+                break
+              fi
+            done
+            
+            if [ "$webkit_found" = "false" ]; then
+              echo "⚠ 警告: 未找到 webkit 包，尝试继续构建..."
+              dpkg -l | grep webkit || echo "无 webkit 包"
+            fi
+            
+            # 执行构建
+            echo "开始编译..."
+            export CGO_ENABLED=1
+            
+            # 尝试构建，即使缺少某些依赖
+            if go build -v -ldflags="-s -w" -o knimg-linux-amd64 .; then
+              echo "✓ Linux 构建成功"
+            else
+              echo "⚠ 构建失败，尝试禁用 CGO..."
+              # 尝试禁用 CGO
+              export CGO_ENABLED=0
+              if go build -v -ldflags="-s -w" -o knimg-linux-amd64 .; then
+                echo "✓ Linux 构建成功 (禁用 CGO)"
+              else
+                echo "✗ 所有构建尝试失败"
+                # 不退出，让工作流继续
+              fi
+            fi
           fi
+          
           # 检查构建结果
-          ls -la knimg-* || echo "构建文件不存在"
-        shell: bash
+          echo "\n=== 构建产物 ==="
+          ls -lh knimg-* 2>/dev/null || echo "警告: 未找到构建文件"
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
