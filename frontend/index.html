@@ -4,18 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>KnImg - 文件管理与图片压缩工具</title>
-
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
             --primary: #4f46e5;
-            --primary-dark: #4338ca;
-            --secondary: #7c3aed;
             --accent: #06b6d4;
             --accent-dark: #0891b2;
             --background: #f8fafc;
@@ -24,8 +17,11 @@
             --text: #1e293b;
             --text-secondary: #64748b;
             --border: rgba(0, 0, 0, 0.1);
-            --glow: rgba(79, 70, 229, 0.5);
             --glow-accent: rgba(6, 182, 212, 0.5);
+            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.1);
         }
 
         body {
@@ -52,9 +48,7 @@
             transition: opacity 0.3s ease;
         }
 
-        #topProgressBar.active {
-            opacity: 1;
-        }
+        #topProgressBar.active { opacity: 1; }
 
         #topProgressBar .progress-bar-inner {
             height: 100%;
@@ -73,7 +67,7 @@
             padding: 12px 20px;
             border-radius: 8px;
             border: 1px solid var(--border);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow-sm);
             display: none;
             align-items: center;
             gap: 10px;
@@ -81,19 +75,11 @@
             animation: slideIn 0.3s ease;
         }
 
-        .loading-indicator.active {
-            display: flex;
-        }
+        .loading-indicator.active { display: flex; }
 
         @keyframes slideIn {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
         .loading-spinner {
@@ -108,12 +94,6 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            font-size: 14px;
-            color: var(--text);
-            font-weight: 500;
         }
 
         /* 按钮loading状态 */
@@ -136,23 +116,20 @@
         }
 
         .container {
-          
             margin: 0 auto;
             background: var(--surface);
             backdrop-filter: blur(20px);
             border-radius: 16px;
             border: 1px solid var(--border);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow-md);
             overflow: hidden;
             transition: all 0.3s ease;
         }
 
-        .container:hover {
-            box-shadow: 0 12px 40px rgba(79, 70, 229, 0.15);
-        }
+        .container:hover { box-shadow: 0 12px 40px rgba(79, 70, 229, 0.15); }
 
         .header {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            background: var(--gradient-primary);
             color: white;
             padding: 15px 20px;
             display: flex;
@@ -221,26 +198,6 @@
             transition: all 0.3s ease;
         }
 
-        .header-stat-card.stat-image {
-            background: linear-gradient(135deg, rgba(6, 182, 212, 0.15) 0%, rgba(8, 145, 178, 0.15) 100%);
-            border-color: rgba(6, 182, 212, 0.2);
-        }
-
-        .header-stat-card.stat-document {
-            background: linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(5, 150, 105, 0.15) 100%);
-            border-color: rgba(16, 185, 129, 0.2);
-        }
-
-        .header-stat-card.stat-video {
-            background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.15) 100%);
-            border-color: rgba(245, 158, 11, 0.2);
-        }
-
-        .header-stat-card.stat-other {
-            background: linear-gradient(135deg, rgba(100, 116, 139, 0.15) 0%, rgba(71, 85, 105, 0.15) 100%);
-            border-color: rgba(100, 116, 139, 0.2);
-        }
-
         .header-stat-card:hover {
             background: rgba(255, 255, 255, 0.25);
             transform: translateY(-2px);
@@ -260,9 +217,7 @@
             letter-spacing: 0.5px;
         }
 
-        .content {
-            padding: 30px;
-        }
+        .content { padding: 30px; }
 
         /* 筛选区域 */
         .filter-section {
@@ -287,9 +242,7 @@
             margin-bottom: 15px;
         }
 
-        .filter-row:last-child {
-            margin-bottom: 0;
-        }
+        .filter-row:last-child { margin-bottom: 0; }
 
         .filter-group {
             display: flex;
@@ -321,73 +274,11 @@
             box-shadow: 0 0 0 3px var(--glow-accent);
         }
 
-        .search-input {
-            min-width: 200px;
-        }
+        .search-input { min-width: 200px; }
+        .size-input { width: 100px; }
+        .dir-input { min-width: 280px; }
 
-        .size-input {
-            width: 100px;
-        }
-
-        .dir-input {
-            min-width: 280px;
-        }
-
-        .browse-btn {
-            padding: 8px 12px;
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .browse-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-        }
-
-        .browse-btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .browse-btn:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-
-        /* 工具栏 */
-        .toolbar {
-            display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            align-items: center;
-            padding: 15px;
-            background: var(--surface-light);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            transition: all 0.3s ease;
-        }
-
-        .toolbar:hover {
-            box-shadow: 0 4px 20px rgba(79, 70, 229, 0.1);
-            border-color: rgba(79, 70, 229, 0.3);
-        }
-
+        /* 通用按钮样式 */
         .btn {
             padding: 10px 20px;
             border: none;
@@ -421,25 +312,24 @@
             height: 300px;
         }
 
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
         .btn-primary {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            background: var(--gradient-primary);
             color: white;
         }
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-        }
+        .btn-primary:hover { box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4); }
 
         .btn-success {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            background: var(--gradient-success);
             color: white;
         }
 
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-        }
+        .btn-success:hover { box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); }
 
         .btn-secondary {
             background: rgba(255, 255, 255, 0.9);
@@ -447,10 +337,41 @@
             border: 1px solid var(--border);
         }
 
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 1);
+        .browse-btn {
+            padding: 8px 12px;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .browse-btn:hover {
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        /* 工具栏 */
+        .toolbar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            align-items: center;
+            padding: 15px;
+            background: var(--surface-light);
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+
+        .toolbar:hover {
+            box-shadow: 0 4px 20px rgba(79, 70, 229, 0.1);
+            border-color: rgba(79, 70, 229, 0.3);
         }
 
         .quality-slider {
@@ -481,7 +402,7 @@
             width: 16px;
             height: 16px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            background: var(--gradient-primary);
             cursor: pointer;
             box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
         }
@@ -493,39 +414,6 @@
             color: #6366f1;
         }
 
-        /* 统计卡片 */
-        .stats-cards {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            color: white;
-            padding: 12px;
-            border-radius: 6px;
-            text-align: center;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.2);
-        }
-
-        .stat-card-value {
-            font-size: 1.5em;
-            font-weight: bold;
-            margin-bottom: 3px;
-        }
-
-        .stat-card-label {
-            font-size: 0.8em;
-            opacity: 0.9;
-        }
-
-        .stat-card.image { background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%); box-shadow: 0 4px 12px rgba(6, 182, 212, 0.2); }
-        .stat-card.document { background: linear-gradient(135deg, #10b981 0%, #059669 100%); box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2); }
-        .stat-card.video { background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%); box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2); }
-        .stat-card.other { background: linear-gradient(135deg, #64748b 0%, #475569 100%); box-shadow: 0 4px 12px rgba(100, 116, 139, 0.2); }
-
         /* 文件列表 */
         .file-list {
             border: 1px solid var(--border);
@@ -536,23 +424,10 @@
             background: var(--surface-light);
         }
 
-        .file-list::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .file-list::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.05);
-            border-radius: 3px;
-        }
-
-        .file-list::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 3px;
-        }
-
-        .file-list::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 0, 0, 0.3);
-        }
+        .file-list::-webkit-scrollbar { width: 6px; }
+        .file-list::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); border-radius: 3px; }
+        .file-list::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.2); border-radius: 3px; }
+        .file-list::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.3); }
 
         .file-list-header {
             display: flex;
@@ -574,9 +449,7 @@
             background: rgba(255, 255, 255, 0.9);
         }
 
-        .file-item:last-child {
-            border-bottom: none;
-        }
+        .file-item:last-child { border-bottom: none; }
 
         .file-item:hover {
             background: rgba(255, 255, 255, 1);
@@ -640,25 +513,10 @@
             white-space: nowrap;
         }
 
-        .type-image {
-            background: rgba(6, 182, 212, 0.2);
-            color: #06b6d4;
-        }
-
-        .type-document {
-            background: rgba(16, 185, 129, 0.2);
-            color: #10b981;
-        }
-
-        .type-video {
-            background: rgba(245, 158, 11, 0.2);
-            color: #f59e0b;
-        }
-
-        .type-other {
-            background: rgba(100, 116, 139, 0.2);
-            color: #64748b;
-        }
+        .type-image { background: rgba(6, 182, 212, 0.2); color: #06b6d4; }
+        .type-document { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .type-video { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .type-other { background: rgba(100, 116, 139, 0.2); color: #64748b; }
 
         .file-size {
             min-width: 100px;
@@ -683,11 +541,6 @@
             animation: spin 1s linear infinite;
             margin: 0 auto 20px;
             box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
 
         /* 消息提示 */
@@ -777,14 +630,8 @@
         }
 
         @keyframes slideUp {
-            from {
-                transform: translateY(50px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
         }
 
         .modal-header {
@@ -823,19 +670,9 @@
             flex: 1;
         }
 
-        .modal-body::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .modal-body::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.05);
-            border-radius: 3px;
-        }
-
-        .modal-body::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 3px;
-        }
+        .modal-body::-webkit-scrollbar { width: 6px; }
+        .modal-body::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); border-radius: 3px; }
+        .modal-body::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.2); border-radius: 3px; }
 
         .current-path {
             background: rgba(255, 255, 255, 0.9);
@@ -867,18 +704,14 @@
             border-bottom: 1px solid var(--border);
         }
 
-        .directory-item:last-child {
-            border-bottom: none;
-        }
+        .directory-item:last-child { border-bottom: none; }
 
         .directory-item:hover {
             background: rgba(241, 245, 249, 1);
             transform: translateX(5px);
         }
 
-        .directory-item.parent {
-            background: rgba(99, 102, 241, 0.1);
-        }
+        .directory-item.parent { background: rgba(99, 102, 241, 0.1); }
 
         .directory-icon {
             font-size: 1.2em;
@@ -913,12 +746,12 @@
         .btn-cancel:hover {
             background: rgba(255, 255, 255, 1);
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow-sm);
         }
 
         .btn-select {
             padding: 10px 20px;
-            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            background: var(--gradient-primary);
             color: white;
             border: none;
             border-radius: 8px;
@@ -934,22 +767,19 @@
             box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
         }
 
-        .btn-select::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
+        /* 压缩进度 */
+        #compressProgress {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
         }
 
-        .btn-select:hover::before {
-            width: 300px;
-            height: 300px;
+        #compressProgress div { color: var(--text-secondary); }
+
+        #progressBar {
+            background: var(--gradient-primary) !important;
         }
 
         /* 响应式 */
@@ -969,48 +799,22 @@
                 align-items: stretch;
             }
 
-            .filter-group {
-                width: 100%;
-            }
-
+            .filter-group { width: 100%; }
             .filter-group input,
-            .filter-group select {
-                flex: 1;
-            }
+            .filter-group select { flex: 1; }
 
             .toolbar {
                 flex-direction: column;
                 align-items: stretch;
             }
 
-            .quality-slider {
-                justify-content: center;
-            }
-        }
-
-        /* 压缩进度 */
-        #compressProgress {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 10px 15px;
-            border-radius: 8px;
-            border: 1px solid var(--border);
-        }
-
-        #compressProgress div {
-            color: var(--text-secondary);
-        }
-
-        #progressBar {
-            background: linear-gradient(90deg, #6366f1 0%, #8b5cf6 100%) !important;
+            .quality-slider { justify-content: center; }
         }
     </style>
 </head>
 <body>
     <!-- 顶部进度条 -->
-    <div id="topProgressBar">
-        <div class="progress-bar-inner"></div>
-    </div>
+    <div id="topProgressBar"><div class="progress-bar-inner"></div></div>
 
     <!-- Loading指示器 -->
     <div id="loadingIndicator" class="loading-indicator">
@@ -1025,19 +829,19 @@
                 <p>智能文件管理与图片压缩工具 <span id="loadedInfo" style="margin-left: 15px; opacity: 0.9;"></span></p>
             </div>
             <div class="header-stats" id="headerStats" style="display: none;">
-                <div class="header-stat-card stat-image">
+                <div class="header-stat-card">
                     <div class="header-stat-value" id="headerStatImage">0</div>
                     <div class="header-stat-label">图片</div>
                 </div>
-                <div class="header-stat-card stat-document">
+                <div class="header-stat-card">
                     <div class="header-stat-value" id="headerStatDoc">0</div>
                     <div class="header-stat-label">文档</div>
                 </div>
-                <div class="header-stat-card stat-video">
+                <div class="header-stat-card">
                     <div class="header-stat-value" id="headerStatVideo">0</div>
                     <div class="header-stat-label">视频</div>
                 </div>
-                <div class="header-stat-card stat-other">
+                <div class="header-stat-card">
                     <div class="header-stat-value" id="headerStatOther">0</div>
                     <div class="header-stat-label">其他</div>
                 </div>
@@ -1104,8 +908,6 @@
                 </div>
             </div>
 
-
-
             <!-- 工具栏 -->
             <div class="toolbar">
                 <div class="quality-slider">
@@ -1119,9 +921,7 @@
                     <label for="overwrite">覆盖原文件</label>
                 </div>
 
-                <button class="btn btn-success" id="compressBtn" onclick="compressFiles()">
-                    🗜️ 压缩选中
-                </button>
+                <button class="btn btn-success" id="compressBtn" onclick="compressFiles()">🗜️ 压缩选中</button>
 
                 <!-- 压缩进度 -->
                 <div id="compressProgress" style="display: none; margin-left: 15px; flex: 1;">
@@ -1132,18 +932,10 @@
                     <div id="progressText" style="font-size: 12px; color: #718096; margin-top: 5px;">0%</div>
                 </div>
 
-
-
                 <div class="export-group">
-                    <button class="btn btn-secondary" id="exportExcelBtn" onclick="exportFiles('excel')">
-                        📊 Excel
-                    </button>
-                    <button class="btn btn-secondary" id="exportCsvBtn" onclick="exportFiles('csv')">
-                        📄 CSV
-                    </button>
-                    <button class="btn btn-secondary" id="exportJsonBtn" onclick="exportFiles('json')">
-                        📋 JSON
-                    </button>
+                    <button class="btn btn-secondary" id="exportExcelBtn" onclick="exportFiles('excel')">📊 Excel</button>
+                    <button class="btn btn-secondary" id="exportCsvBtn" onclick="exportFiles('csv')">📄 CSV</button>
+                    <button class="btn btn-secondary" id="exportJsonBtn" onclick="exportFiles('json')">📋 JSON</button>
                 </div>
             </div>
 
@@ -1176,65 +968,74 @@
     </div>
 
     <script>
-        let allFiles = [];
-        let filteredFiles = [];
-        let currentBrowsePath = '';
-        let activeDirectoryInput = null;
-        let currentExportFormat = null;
-        let isLoading = false;
+        // 状态管理
+        const state = {
+            allFiles: [],
+            filteredFiles: [],
+            currentBrowsePath: '',
+            activeDirectoryInput: null,
+            currentExportFormat: null
+        };
+
+        // DOM 元素缓存
+        const el = {
+            loadingIndicator: document.getElementById('loadingIndicator'),
+            loadingText: document.getElementById('loadingText'),
+            progressBar: document.getElementById('topProgressBar'),
+            progressInner: document.querySelector('.progress-bar-inner'),
+            fileList: document.getElementById('fileList'),
+            message: document.getElementById('message'),
+            headerStats: document.getElementById('headerStats'),
+            loadedInfo: document.getElementById('loadedInfo'),
+            directoryModal: document.getElementById('directoryModal'),
+            modalTitle: document.getElementById('modalTitle'),
+            currentPath: document.getElementById('currentPath'),
+            directoryList: document.getElementById('directoryList'),
+            compressProgress: document.getElementById('compressProgress'),
+            progressBarInner: document.getElementById('progressBar'),
+            progressText: document.getElementById('progressText')
+        };
 
         // 质量滑块事件
         document.getElementById('quality').addEventListener('input', function() {
             document.getElementById('qualityValue').textContent = this.value + '%';
         });
 
-        // 显示loading
+        // 显示/隐藏loading
         function showLoading(text = '加载中...') {
-            isLoading = true;
-            document.getElementById('loadingText').textContent = text;
-            document.getElementById('loadingIndicator').classList.add('active');
-            document.getElementById('topProgressBar').classList.add('active');
-            document.getElementById('topProgressBar').querySelector('.progress-bar-inner').style.width = '0%';
+            el.loadingText.textContent = text;
+            el.loadingIndicator.classList.add('active');
+            el.progressBar.classList.add('active');
+            el.progressInner.style.width = '0%';
         }
 
-        // 隐藏loading
         function hideLoading() {
-            isLoading = false;
-            document.getElementById('loadingIndicator').classList.remove('active');
-            document.getElementById('topProgressBar').classList.remove('active');
+            el.loadingIndicator.classList.remove('active');
+            el.progressBar.classList.remove('active');
         }
 
         // 更新进度
         function updateProgress(percent) {
-            document.getElementById('topProgressBar').querySelector('.progress-bar-inner').style.width = percent + '%';
+            el.progressInner.style.width = percent + '%';
         }
 
         // 设置按钮loading状态
         function setButtonLoading(buttonId, loading) {
-            const button = document.getElementById(buttonId);
-            if (loading) {
-                button.classList.add('loading');
-            } else {
-                button.classList.remove('loading');
-            }
+            document.getElementById(buttonId)?.classList.toggle('loading', loading);
         }
 
         // 打开文件夹浏览器
         async function openDirectoryBrowser(inputId) {
-            activeDirectoryInput = inputId;
-            document.getElementById('modalTitle').textContent = 
-                inputId === 'workDir' ? '选择工作目录' : '选择导出目录';
-            
-            const currentPath = document.getElementById(inputId).value;
-            await browseDirectory(currentPath);
-            
-            document.getElementById('directoryModal').style.display = 'flex';
+            state.activeDirectoryInput = inputId;
+            el.modalTitle.textContent = inputId === 'workDir' ? '选择工作目录' : '选择导出目录';
+            await browseDirectory(document.getElementById(inputId).value);
+            el.directoryModal.style.display = 'flex';
         }
 
         // 关闭文件夹浏览器
         function closeDirectoryBrowser() {
-            document.getElementById('directoryModal').style.display = 'none';
-            activeDirectoryInput = null;
+            el.directoryModal.style.display = 'none';
+            state.activeDirectoryInput = null;
         }
 
         // 浏览目录
@@ -1242,13 +1043,11 @@
             try {
                 const params = new URLSearchParams();
                 if (path) params.append('path', path);
-                
                 const response = await fetch('/api/directory/browse?' + params.toString());
                 const data = await response.json();
-
                 if (data.success) {
-                    currentBrowsePath = data.current_path;
-                    document.getElementById('currentPath').textContent = currentBrowsePath;
+                    state.currentBrowsePath = data.current_path;
+                    el.currentPath.textContent = state.currentBrowsePath;
                     renderDirectoryList(data.directories);
                 }
             } catch (error) {
@@ -1258,10 +1057,8 @@
 
         // 渲染目录列表
         function renderDirectoryList(directories) {
-            const container = document.getElementById('directoryList');
-            container.innerHTML = directories.map(dir => `
-                <div class="directory-item ${dir === '..' ? 'parent' : ''}" 
-                     onclick="navigateToDirectory('${dir}')">
+            el.directoryList.innerHTML = directories.map(dir => `
+                <div class="directory-item ${dir === '..' ? 'parent' : ''}" onclick="navigateToDirectory('${dir}')">
                     <span class="directory-icon">${dir === '..' ? '📂..' : '📁'}</span>
                     <span class="directory-name">${dir === '..' ? '上级目录' : dir}</span>
                 </div>
@@ -1270,35 +1067,28 @@
 
         // 导航到目录
         async function navigateToDirectory(dirName) {
-            let newPath;
-            if (dirName === '..') {
-                newPath = currentBrowsePath.split('/').slice(0, -1).join('/') || '/';
-            } else {
-                newPath = currentBrowsePath === '/' ? '/' + dirName : currentBrowsePath + '/' + dirName;
-            }
+            const newPath = dirName === '..' 
+                ? state.currentBrowsePath.split('/').slice(0, -1).join('/') || '/'
+                : state.currentBrowsePath === '/' ? '/' + dirName : state.currentBrowsePath + '/' + dirName;
             await browseDirectory(newPath);
         }
 
         // 选择目录
         function selectDirectory() {
-            if (activeDirectoryInput && currentBrowsePath) {
-                if (activeDirectoryInput === 'export') {
-                    // 处理导出目录选择
-                    closeDirectoryBrowser();
-                    performExport(currentBrowsePath);
-                } else {
-                    // 处理其他目录选择
-                    document.getElementById(activeDirectoryInput).value = currentBrowsePath;
-                    closeDirectoryBrowser();
-                }
+            if (!state.activeDirectoryInput || !state.currentBrowsePath) return;
+            
+            if (state.activeDirectoryInput === 'export') {
+                closeDirectoryBrowser();
+                performExport(state.currentBrowsePath);
+            } else {
+                document.getElementById(state.activeDirectoryInput).value = state.currentBrowsePath;
+                closeDirectoryBrowser();
             }
         }
 
         // 点击模态框外部关闭
-        document.getElementById('directoryModal').addEventListener('click', function(e) {
-            if (e.target === this) {
-                closeDirectoryBrowser();
-            }
+        el.directoryModal.addEventListener('click', e => {
+            if (e.target === el.directoryModal) closeDirectoryBrowser();
         });
 
         // 加载文件列表
@@ -1318,10 +1108,10 @@
 
                 updateProgress(80);
                 if (data.success) {
-                    allFiles = data.data;
+                    state.allFiles = data.data;
                     updateStats(data.stats);
                     applyFilters();
-                    document.getElementById('loadedInfo').textContent = `已加载 ${allFiles.length} 个文件`;
+                    el.loadedInfo.textContent = `已加载 ${state.allFiles.length} 个文件`;
                 } else {
                     showMessage('加载失败：' + data.message, 'error');
                 }
@@ -1337,8 +1127,9 @@
             }
         }
 
-        // 应用筛选
-        function applyFilters() {
+        // 构建筛选参数
+        function buildFilterParams() {
+            const workDir = document.getElementById('workDir').value;
             const search = document.getElementById('searchInput').value;
             const fileType = document.getElementById('typeFilter').value;
             const fileExt = document.getElementById('fileExt').value;
@@ -1346,25 +1137,23 @@
             const maxSizeKB = parseFloat(document.getElementById('maxSize').value) || 0;
             const sortBy = document.getElementById('sortBy').value;
             const sortOrder = document.getElementById('sortOrder').value;
-            const workDir = document.getElementById('workDir').value;
 
-            // 转换为字节
-            const minSize = minSizeKB * 1024;
-            const maxSize = maxSizeKB * 1024;
-
-            // 构建查询参数
             const params = new URLSearchParams();
             if (workDir) params.append('work_dir', workDir);
             if (search) params.append('search', search);
             if (fileType && fileType !== 'all') params.append('file_type', fileType);
             if (fileExt) params.append('file_ext', fileExt);
-            if (minSize > 0) params.append('min_size', minSize);
-            if (maxSize > 0) params.append('max_size', maxSize);
+            if (minSizeKB > 0) params.append('min_size', minSizeKB * 1024);
+            if (maxSizeKB > 0) params.append('max_size', maxSizeKB * 1024);
             params.append('sort_by', sortBy);
             params.append('sort_order', sortOrder);
+            
+            return params;
+        }
 
-            // 发送筛选请求
-            fetchFilteredFiles(params);
+        // 应用筛选
+        function applyFilters() {
+            fetchFilteredFiles(buildFilterParams());
         }
 
         // 获取筛选后的文件
@@ -1372,10 +1161,9 @@
             try {
                 const response = await fetch('/api/files?' + params.toString());
                 const data = await response.json();
-
                 if (data.success) {
-                    filteredFiles = data.data;
-                    renderFileList(filteredFiles);
+                    state.filteredFiles = data.data;
+                    renderFileList(state.filteredFiles);
                     updateStats(data.stats);
                 }
             } catch (error) {
@@ -1385,11 +1173,10 @@
 
         // 清除筛选
         function clearFilters() {
-            document.getElementById('searchInput').value = '';
+            ['searchInput', 'fileExt', 'minSize', 'maxSize'].forEach(id => {
+                document.getElementById(id).value = '';
+            });
             document.getElementById('typeFilter').value = 'all';
-            document.getElementById('fileExt').value = '';
-            document.getElementById('minSize').value = '';
-            document.getElementById('maxSize').value = '';
             document.getElementById('sortBy').value = 'name';
             document.getElementById('sortOrder').value = 'asc';
             applyFilters();
@@ -1398,95 +1185,81 @@
         // 更新统计信息
         function updateStats(stats) {
             if (!stats) return;
-
-            document.getElementById('headerStats').style.display = 'flex';
+            el.headerStats.style.display = 'flex';
             document.getElementById('headerStatImage').textContent = stats.image_count || 0;
             document.getElementById('headerStatDoc').textContent = stats.doc_count || 0;
             document.getElementById('headerStatVideo').textContent = stats.video_count || 0;
             document.getElementById('headerStatOther').textContent = stats.other_count || 0;
         }
 
+        // 创建文件项HTML
+        function createFileItemHTML(file, index) {
+            const typeLabels = {
+                'image': '<span class="file-type type-image">图片</span>',
+                'document': '<span class="file-type type-document">文档</span>',
+                'video': '<span class="file-type type-video">视频</span>',
+                'other': '<span class="file-type type-other">其他</span>'
+            };
+            
+            const extBadge = file.Ext ? `<span class="file-type" style="background:#e9d8fd;color:#44337a;margin-left:8px">${file.Ext}</span>` : '';
+            
+            return `
+                <div class="file-item">
+                    <input type="checkbox" class="file-checkbox" data-index="${index}"
+                           ${file.type === 'image' ? '' : 'disabled'} ${file.selected ? 'checked' : ''}>
+                    <div class="file-info">
+                        <div class="file-name">${file.name}${typeLabels[file.type] || typeLabels['other']}${extBadge}</div>
+                        <div class="file-meta">${file.path} | 修改时间: ${file.mod_time}</div>
+                    </div>
+                    <div class="file-size">${formatSize(file.size)}</div>
+                </div>`;
+        }
+
         // 渲染文件列表
         function renderFileList(fileList) {
-            const container = document.getElementById('fileList');
-
             if (fileList.length === 0) {
-                container.innerHTML = `
+                el.fileList.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-state-icon">📂</div>
                         <p>暂无文件</p>
-                    </div>
-                `;
+                    </div>`;
                 return;
             }
 
-            const html = `
+            el.fileList.innerHTML = `
                 <div class="file-list">
                     <div class="file-list-header">
                         <input type="checkbox" class="file-checkbox" onchange="toggleSelectAll(this)">
                         <div class="file-info">文件名</div>
                         <div class="file-size">大小</div>
                     </div>
-                    ${fileList.map((file, index) => `
-                        <div class="file-item">
-                            <input type="checkbox"
-                                   class="file-checkbox"
-                                   data-index="${index}"
-                                   ${file.type === 'image' ? '' : 'disabled'}
-                                   ${file.selected ? 'checked' : ''}>
-                            <div class="file-info">
-                                <div class="file-name">
-                                    ${file.name}
-                                    ${getTypeLabel(file.type)}
-                                    ${file.Ext ? `<span class="file-type" style="background:#e9d8fd;color:#44337a;margin-left:8px">${file.Ext}</span>` : ''}
-                                </div>
-                                <div class="file-meta">
-                                    ${file.path} | 修改时间: ${file.mod_time}
-                                </div>
-                            </div>
-                            <div class="file-size">${formatSize(file.size)}</div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
-
-            container.innerHTML = html;
+                    ${fileList.map((file, index) => createFileItemHTML(file, index)).join('')}
+                </div>`;
 
             // 添加复选框事件监听
             document.querySelectorAll('.file-checkbox:not([disabled])').forEach(cb => {
                 cb.addEventListener('change', function() {
                     const index = parseInt(this.dataset.index);
-                    filteredFiles[index].selected = this.checked;
+                    if (state.filteredFiles[index]) {
+                        state.filteredFiles[index].selected = this.checked;
+                    }
                 });
             });
         }
 
-        // 获取类型标签
-        function getTypeLabel(type) {
-            const labels = {
-                'image': '<span class="file-type type-image">图片</span>',
-                'document': '<span class="file-type type-document">文档</span>',
-                'video': '<span class="file-type type-video">视频</span>',
-                'other': '<span class="file-type type-other">其他</span>'
-            };
-            return labels[type] || labels['other'];
-        }
-
         // 全选/取消全选
         function toggleSelectAll(checkbox) {
-            const checkboxes = document.querySelectorAll('.file-checkbox:not([disabled])');
-            checkboxes.forEach((cb, index) => {
+            document.querySelectorAll('.file-checkbox:not([disabled])').forEach((cb, index) => {
                 cb.checked = checkbox.checked;
-                if (filteredFiles[index]) {
-                    filteredFiles[index].selected = checkbox.checked;
+                if (state.filteredFiles[index]) {
+                    state.filteredFiles[index].selected = checkbox.checked;
                 }
             });
         }
 
         // 压缩文件
         async function compressFiles() {
-            const selectedFiles = filteredFiles.filter(f => f.selected && f.type === 'image');
-
+            const selectedFiles = state.filteredFiles.filter(f => f.selected && f.type === 'image');
             if (selectedFiles.length === 0) {
                 showMessage('请至少选择一个图片文件', 'error');
                 return;
@@ -1498,12 +1271,9 @@
             const overwrite = document.getElementById('overwrite').checked;
 
             // 显示进度条
-            const progressContainer = document.getElementById('compressProgress');
-            const progressBar = document.getElementById('progressBar');
-            const progressText = document.getElementById('progressText');
-            progressContainer.style.display = 'block';
-            progressBar.style.width = '0%';
-            progressText.textContent = '0%';
+            el.compressProgress.style.display = 'block';
+            el.progressBarInner.style.width = '0%';
+            el.progressText.textContent = '0%';
 
             setButtonLoading('compressBtn', true);
             showLoading(`正在压缩 ${selectedFiles.length} 个文件...`);
@@ -1511,9 +1281,7 @@
             try {
                 const response = await fetch('/api/compress', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         files: filePaths,
                         quality: quality,
@@ -1522,48 +1290,8 @@
                     })
                 });
 
-                // 处理流式响应
                 if (response.ok) {
-                    const reader = response.body.getReader();
-                    const decoder = new TextDecoder();
-                    let buffer = '';
-
-                    while (true) {
-                        const { done, value } = await reader.read();
-                        if (done) break;
-
-                        buffer += decoder.decode(value, { stream: true });
-                        
-                        // 处理进度更新
-                        const lines = buffer.split('\n');
-                        for (const line of lines) {
-                            if (line.startsWith('progress:')) {
-                                const progress = parseInt(line.split(':')[1].trim());
-                                if (!isNaN(progress)) {
-                                    progressBar.style.width = progress + '%';
-                                    progressText.textContent = progress + '%';
-                                    updateProgress(progress);
-                                }
-                            } else if (line.startsWith('data:')) {
-                                try {
-                                    const data = JSON.parse(line.substring(5));
-                                    if (data.success) {
-                                        let message = `${data.message} | 压缩率：${data.ratio}`;
-                                        if (data.failed_count > 0) {
-                                            message += ` | 失败：${data.failed_count} 个`;
-                                        }
-                                        showMessage(message, 'success');
-                                    } else {
-                                        showMessage('压缩失败：' + data.message, 'error');
-                                    }
-                                } catch (e) {
-                                    console.error('解析响应失败:', e);
-                                }
-                            }
-                        }
-                        
-                        buffer = lines[lines.length - 1];
-                    }
+                    await handleCompressStream(response);
                 } else {
                     const data = await response.json();
                     showMessage('压缩失败：' + data.message, 'error');
@@ -1571,63 +1299,84 @@
             } catch (error) {
                 showMessage('压缩失败：' + error.message, 'error');
             } finally {
-                // 隐藏进度条
                 setTimeout(() => {
-                    progressContainer.style.display = 'none';
+                    el.compressProgress.style.display = 'none';
                     setButtonLoading('compressBtn', false);
                     hideLoading();
                 }, 2000);
             }
         }
 
-        // 导出文件
-        function exportFiles(format) {
-            // 保存当前导出格式
-            currentExportFormat = format;
-            
-            // 打开文件夹选择弹窗
-            openExportDirectoryBrowser();
+        // 处理压缩流式响应
+        async function handleCompressStream(response) {
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder();
+            let buffer = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                
+                for (const line of lines) {
+                    if (line.startsWith('progress:')) {
+                        const progress = parseInt(line.split(':')[1].trim());
+                        if (!isNaN(progress)) {
+                            el.progressBarInner.style.width = progress + '%';
+                            el.progressText.textContent = progress + '%';
+                            updateProgress(progress);
+                        }
+                    } else if (line.startsWith('data:')) {
+                        try {
+                            const data = JSON.parse(line.substring(5));
+                            if (data.success) {
+                                let message = `${data.message} | 压缩率：${data.ratio}`;
+                                if (data.failed_count > 0) {
+                                    message += ` | 失败：${data.failed_count} 个`;
+                                }
+                                showMessage(message, 'success');
+                            } else {
+                                showMessage('压缩失败：' + data.message, 'error');
+                            }
+                        } catch (e) {
+                            console.error('解析响应失败:', e);
+                        }
+                    }
+                }
+                
+                buffer = lines[lines.length - 1];
+            }
         }
 
-        // 打开导出文件夹选择弹窗
-        async function openExportDirectoryBrowser() {
-            activeDirectoryInput = 'export';
-            document.getElementById('modalTitle').textContent = '选择导出目录';
-            
-            // 从用户主目录开始浏览
-            await browseDirectory('');
-            
-            document.getElementById('directoryModal').style.display = 'flex';
+        // 导出文件
+        function exportFiles(format) {
+            state.currentExportFormat = format;
+            state.activeDirectoryInput = 'export';
+            el.modalTitle.textContent = '选择导出目录';
+            browseDirectory('').then(() => {
+                el.directoryModal.style.display = 'flex';
+            });
         }
 
         // 执行导出操作
         async function performExport(exportDir) {
-            const format = currentExportFormat;
+            const format = state.currentExportFormat;
             if (!format) return;
 
-            const buttonId = format === 'excel' ? 'exportExcelBtn' : 
-                            format === 'csv' ? 'exportCsvBtn' : 'exportJsonBtn';
+            const buttonMap = {
+                'excel': 'exportExcelBtn',
+                'csv': 'exportCsvBtn',
+                'json': 'exportJsonBtn'
+            };
             
-            setButtonLoading(buttonId, true);
+            setButtonLoading(buttonMap[format], true);
             showLoading(`正在导出 ${format.toUpperCase()} 文件...`);
 
-            // 获取当前筛选参数
-            const search = document.getElementById('searchInput').value;
-            const fileType = document.getElementById('typeFilter').value;
-            const fileExt = document.getElementById('fileExt').value;
-            const minSizeKB = parseFloat(document.getElementById('minSize').value) || 0;
-            const maxSizeKB = parseFloat(document.getElementById('maxSize').value) || 0;
-            const workDir = document.getElementById('workDir').value;
-
-            const params = new URLSearchParams();
+            const params = buildFilterParams();
             params.append('format', format);
-            if (workDir) params.append('work_dir', workDir);
             if (exportDir) params.append('export_dir', exportDir);
-            if (search) params.append('search', search);
-            if (fileType && fileType !== 'all') params.append('file_type', fileType);
-            if (fileExt) params.append('file_ext', fileExt);
-            if (minSizeKB > 0) params.append('min_size', minSizeKB * 1024);
-            if (maxSizeKB > 0) params.append('max_size', maxSizeKB * 1024);
 
             try {
                 updateProgress(50);
@@ -1644,26 +1393,18 @@
                 showMessage('导出失败：' + error.message, 'error');
             } finally {
                 setTimeout(() => {
-                    setButtonLoading(buttonId, false);
+                    setButtonLoading(buttonMap[format], false);
                     hideLoading();
-                    currentExportFormat = null;
+                    state.currentExportFormat = null;
                 }, 300);
             }
         }
 
         // 显示消息
         function showMessage(text, type) {
-            const container = document.getElementById('message');
-            container.innerHTML = `
-                <div class="message message-${type}">
-                    ${text}
-                </div>
-            `;
-
+            el.message.innerHTML = `<div class="message message-${type}">${text}</div>`;
             if (type !== 'info') {
-                setTimeout(() => {
-                    container.innerHTML = '';
-                }, 5000);
+                setTimeout(() => { el.message.innerHTML = ''; }, 5000);
             }
         }
 
