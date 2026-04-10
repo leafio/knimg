@@ -110,8 +110,9 @@ jobs:
           # 确保 CGO 启用
           $env:CGO_ENABLED = 1
           
-          Write-Host "构建 Windows 版本..."
-          go build -v -ldflags="-s -w" -o knimg-windows-amd64.exe .
+          Write-Host "构建 Windows 窗口应用版本..."
+          # 使用 -H=windowsgui 标志构建窗口应用，不显示控制台
+          go build -v -ldflags="-H=windowsgui -s -w" -o knimg-windows-amd64.exe .
           
           # 检查构建结果
           Write-Host "\n=== 构建产物 ==="
@@ -137,6 +138,66 @@ jobs:
           
           echo "构建 macOS ARM64 版本..."
           GOARCH=arm64 go build -v -ldflags="-s -w" -o knimg-darwin-arm64 .
+          
+          # 创建 macOS 应用程序包 (AMD64)
+          echo "\n=== 创建 macOS 应用程序包 (AMD64) ==="
+          mkdir -p KnImg-amd64.app/Contents/MacOS
+          mkdir -p KnImg-amd64.app/Contents/Resources
+          cp knimg-darwin-amd64 KnImg-amd64.app/Contents/MacOS/
+          chmod +x KnImg-amd64.app/Contents/MacOS/knimg-darwin-amd64
+          
+          # 创建 Info.plist
+          cat > KnImg-amd64.app/Contents/Info.plist << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>CFBundleExecutable</key>
+              <string>knimg-darwin-amd64</string>
+              <key>CFBundleIdentifier</key>
+              <string>com.knimg.app</string>
+              <key>CFBundleName</key>
+              <string>KnImg</string>
+              <key>CFBundleVersion</key>
+              <string>1.0</string>
+              <key>NSHighResolutionCapable</key>
+              <true/>
+          </dict>
+          </plist>
+          EOF
+          
+          # 压缩应用程序包
+          zip -r knimg-macos-amd64.app.zip KnImg-amd64.app
+          
+          # 创建 macOS 应用程序包 (ARM64)
+          echo "\n=== 创建 macOS 应用程序包 (ARM64) ==="
+          mkdir -p KnImg-arm64.app/Contents/MacOS
+          mkdir -p KnImg-arm64.app/Contents/Resources
+          cp knimg-darwin-arm64 KnImg-arm64.app/Contents/MacOS/
+          chmod +x KnImg-arm64.app/Contents/MacOS/knimg-darwin-arm64
+          
+          # 创建 Info.plist
+          cat > KnImg-arm64.app/Contents/Info.plist << EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>CFBundleExecutable</key>
+              <string>knimg-darwin-arm64</string>
+              <key>CFBundleIdentifier</key>
+              <string>com.knimg.app</string>
+              <key>CFBundleName</key>
+              <string>KnImg</string>
+              <key>CFBundleVersion</key>
+              <string>1.0</string>
+              <key>NSHighResolutionCapable</key>
+              <true/>
+          </dict>
+          </plist>
+          EOF
+          
+          # 压缩应用程序包
+          zip -r knimg-macos-arm64.app.zip KnImg-arm64.app
           
           # 检查构建结果
           echo "\n=== 构建产物 ==="
@@ -209,6 +270,7 @@ jobs:
             knimg-*.exe
             knimg-*-amd64
             knimg-*-arm64
+            knimg-*.app.zip
 
   release:
     needs: build
@@ -228,5 +290,6 @@ jobs:
             artifacts/**/knimg-*.exe
             artifacts/**/knimg-*-amd64
             artifacts/**/knimg-*-arm64
+            artifacts/**/knimg-*.app.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
