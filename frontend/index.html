@@ -77,11 +77,33 @@
 
         .loading-indicator.active { display: flex; }
 
+        /* 通用动画 */
         @keyframes slideIn {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
 
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes shine {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* 加载动画 */
         .loading-spinner {
             width: 16px;
             height: 16px;
@@ -91,12 +113,45 @@
             animation: spin 1s linear infinite;
         }
 
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        /* 按钮样式 */
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
         }
 
-        /* 按钮loading状态 */
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-sm);
+        }
+
         .btn.loading {
             position: relative;
             pointer-events: none;
@@ -115,6 +170,46 @@
             margin-left: 8px;
         }
 
+        /* 按钮变体 */
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .btn-primary:hover { box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4); }
+
+        .btn-success {
+            background: var(--gradient-success);
+            color: white;
+        }
+
+        .btn-success:hover { box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .browse-btn {
+            padding: 8px 12px;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .browse-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+        }
+
+        /* 容器 */
         .container {
             margin: 0 auto;
             background: var(--surface);
@@ -128,6 +223,7 @@
 
         .container:hover { box-shadow: 0 12px 40px rgba(79, 70, 229, 0.15); }
 
+        /* 头部 */
         .header {
             background: var(--gradient-primary);
             color: white;
@@ -153,11 +249,6 @@
             animation: shine 3s infinite;
         }
 
-        @keyframes shine {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-
         .header-content {
             flex: 1;
             min-width: 300px;
@@ -178,6 +269,7 @@
             text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
         }
 
+        /* 头部统计 */
         .header-stats {
             display: flex;
             gap: 12px;
@@ -274,86 +366,10 @@
             box-shadow: 0 0 0 3px var(--glow-accent);
         }
 
+        /* 输入框大小 */
         .search-input { min-width: 200px; }
         .size-input { width: 100px; }
         .dir-input { min-width: 280px; }
-
-        /* 通用按钮样式 */
-        .btn {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .btn:hover::before {
-            width: 300px;
-            height: 300px;
-        }
-
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-sm);
-        }
-
-        .btn-primary {
-            background: var(--gradient-primary);
-            color: white;
-        }
-
-        .btn-primary:hover { box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4); }
-
-        .btn-success {
-            background: var(--gradient-success);
-            color: white;
-        }
-
-        .btn-success:hover { box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.9);
-            color: var(--text);
-            border: 1px solid var(--border);
-        }
-
-        .browse-btn {
-            padding: 8px 12px;
-            background: var(--gradient-primary);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .browse-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-        }
 
         /* 工具栏 */
         .toolbar {
@@ -374,6 +390,7 @@
             border-color: rgba(79, 70, 229, 0.3);
         }
 
+        /* 质量滑块 */
         .quality-slider {
             display: flex;
             align-items: center;
@@ -424,10 +441,28 @@
             background: var(--surface-light);
         }
 
-        .file-list::-webkit-scrollbar { width: 6px; }
-        .file-list::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); border-radius: 3px; }
-        .file-list::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.2); border-radius: 3px; }
-        .file-list::-webkit-scrollbar-thumb:hover { background: rgba(0, 0, 0, 0.3); }
+        /* 滚动条样式 */
+        .file-list::-webkit-scrollbar,
+        .modal-body::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .file-list::-webkit-scrollbar-track,
+        .modal-body::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 3px;
+        }
+
+        .file-list::-webkit-scrollbar-thumb,
+        .modal-body::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+
+        .file-list::-webkit-scrollbar-thumb:hover,
+        .modal-body::-webkit-scrollbar-thumb:hover {
+            background: rgba(0, 0, 0, 0.3);
+        }
 
         .file-list-header {
             display: flex;
@@ -503,6 +538,7 @@
             text-overflow: ellipsis;
         }
 
+        /* 文件类型标签 */
         .file-type {
             display: inline-block;
             padding: 4px 12px;
@@ -610,11 +646,6 @@
             animation: fadeIn 0.3s ease;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
         .modal {
             background: var(--surface-light);
             backdrop-filter: blur(20px);
@@ -627,11 +658,6 @@
             box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
             border: 1px solid var(--border);
             animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
         }
 
         .modal-header {
@@ -669,10 +695,6 @@
             overflow-y: auto;
             flex: 1;
         }
-
-        .modal-body::-webkit-scrollbar { width: 6px; }
-        .modal-body::-webkit-scrollbar-track { background: rgba(0, 0, 0, 0.05); border-radius: 3px; }
-        .modal-body::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.2); border-radius: 3px; }
 
         .current-path {
             background: rgba(255, 255, 255, 0.9);
@@ -732,15 +754,21 @@
             justify-content: flex-end;
         }
 
-        .btn-cancel {
+        .btn-cancel,
+        .btn-select {
             padding: 10px 20px;
-            background: rgba(255, 255, 255, 0.9);
-            color: var(--text);
-            border: 1px solid var(--border);
             border-radius: 8px;
             cursor: pointer;
             font-weight: 500;
             transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-cancel {
+            background: rgba(255, 255, 255, 0.9);
+            color: var(--text);
+            border: 1px solid var(--border);
         }
 
         .btn-cancel:hover {
@@ -750,16 +778,9 @@
         }
 
         .btn-select {
-            padding: 10px 20px;
             background: var(--gradient-primary);
             color: white;
             border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 500;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
         }
 
         .btn-select:hover {
@@ -993,13 +1014,36 @@
             directoryList: document.getElementById('directoryList'),
             compressProgress: document.getElementById('compressProgress'),
             progressBarInner: document.getElementById('progressBar'),
-            progressText: document.getElementById('progressText')
+            progressText: document.getElementById('progressText'),
+            quality: document.getElementById('quality'),
+            qualityValue: document.getElementById('qualityValue'),
+            workDir: document.getElementById('workDir'),
+            searchInput: document.getElementById('searchInput'),
+            typeFilter: document.getElementById('typeFilter'),
+            fileExt: document.getElementById('fileExt'),
+            minSize: document.getElementById('minSize'),
+            maxSize: document.getElementById('maxSize'),
+            sortBy: document.getElementById('sortBy'),
+            sortOrder: document.getElementById('sortOrder'),
+            overwrite: document.getElementById('overwrite'),
+            headerStatImage: document.getElementById('headerStatImage'),
+            headerStatDoc: document.getElementById('headerStatDoc'),
+            headerStatVideo: document.getElementById('headerStatVideo'),
+            headerStatOther: document.getElementById('headerStatOther')
         };
 
-        // 质量滑块事件
-        document.getElementById('quality').addEventListener('input', function() {
-            document.getElementById('qualityValue').textContent = this.value + '%';
-        });
+        // 初始化事件监听
+        function initEventListeners() {
+            // 质量滑块事件
+            el.quality.addEventListener('input', function() {
+                el.qualityValue.textContent = this.value + '%';
+            });
+
+            // 点击模态框外部关闭
+            el.directoryModal.addEventListener('click', e => {
+                if (e.target === el.directoryModal) closeDirectoryBrowser();
+            });
+        }
 
         // 显示/隐藏loading
         function showLoading(text = '加载中...') {
@@ -1028,7 +1072,7 @@
         async function openDirectoryBrowser(inputId) {
             state.activeDirectoryInput = inputId;
             el.modalTitle.textContent = inputId === 'workDir' ? '选择工作目录' : '选择导出目录';
-            await browseDirectory(document.getElementById(inputId).value);
+            await browseDirectory(el[inputId]?.value || '');
             el.directoryModal.style.display = 'flex';
         }
 
@@ -1081,15 +1125,10 @@
                 closeDirectoryBrowser();
                 performExport(state.currentBrowsePath);
             } else {
-                document.getElementById(state.activeDirectoryInput).value = state.currentBrowsePath;
+                el[state.activeDirectoryInput].value = state.currentBrowsePath;
                 closeDirectoryBrowser();
             }
         }
-
-        // 点击模态框外部关闭
-        el.directoryModal.addEventListener('click', e => {
-            if (e.target === el.directoryModal) closeDirectoryBrowser();
-        });
 
         // 加载文件列表
         async function loadFiles() {
@@ -1098,9 +1137,8 @@
                 showLoading('正在加载文件列表...');
                 updateProgress(30);
                 
-                const workDir = document.getElementById('workDir').value;
                 const params = new URLSearchParams();
-                if (workDir) params.append('work_dir', workDir);
+                if (el.workDir.value) params.append('work_dir', el.workDir.value);
                 
                 updateProgress(50);
                 const response = await fetch('/api/files?' + params.toString());
@@ -1129,24 +1167,18 @@
 
         // 构建筛选参数
         function buildFilterParams() {
-            const workDir = document.getElementById('workDir').value;
-            const search = document.getElementById('searchInput').value;
-            const fileType = document.getElementById('typeFilter').value;
-            const fileExt = document.getElementById('fileExt').value;
-            const minSizeKB = parseFloat(document.getElementById('minSize').value) || 0;
-            const maxSizeKB = parseFloat(document.getElementById('maxSize').value) || 0;
-            const sortBy = document.getElementById('sortBy').value;
-            const sortOrder = document.getElementById('sortOrder').value;
+            const minSizeKB = parseFloat(el.minSize.value) || 0;
+            const maxSizeKB = parseFloat(el.maxSize.value) || 0;
 
             const params = new URLSearchParams();
-            if (workDir) params.append('work_dir', workDir);
-            if (search) params.append('search', search);
-            if (fileType && fileType !== 'all') params.append('file_type', fileType);
-            if (fileExt) params.append('file_ext', fileExt);
+            if (el.workDir.value) params.append('work_dir', el.workDir.value);
+            if (el.searchInput.value) params.append('search', el.searchInput.value);
+            if (el.typeFilter.value && el.typeFilter.value !== 'all') params.append('file_type', el.typeFilter.value);
+            if (el.fileExt.value) params.append('file_ext', el.fileExt.value);
             if (minSizeKB > 0) params.append('min_size', minSizeKB * 1024);
             if (maxSizeKB > 0) params.append('max_size', maxSizeKB * 1024);
-            params.append('sort_by', sortBy);
-            params.append('sort_order', sortOrder);
+            params.append('sort_by', el.sortBy.value);
+            params.append('sort_order', el.sortOrder.value);
             
             return params;
         }
@@ -1173,12 +1205,13 @@
 
         // 清除筛选
         function clearFilters() {
-            ['searchInput', 'fileExt', 'minSize', 'maxSize'].forEach(id => {
-                document.getElementById(id).value = '';
-            });
-            document.getElementById('typeFilter').value = 'all';
-            document.getElementById('sortBy').value = 'name';
-            document.getElementById('sortOrder').value = 'asc';
+            el.searchInput.value = '';
+            el.fileExt.value = '';
+            el.minSize.value = '';
+            el.maxSize.value = '';
+            el.typeFilter.value = 'all';
+            el.sortBy.value = 'name';
+            el.sortOrder.value = 'asc';
             applyFilters();
         }
 
@@ -1186,10 +1219,10 @@
         function updateStats(stats) {
             if (!stats) return;
             el.headerStats.style.display = 'flex';
-            document.getElementById('headerStatImage').textContent = stats.image_count || 0;
-            document.getElementById('headerStatDoc').textContent = stats.doc_count || 0;
-            document.getElementById('headerStatVideo').textContent = stats.video_count || 0;
-            document.getElementById('headerStatOther').textContent = stats.other_count || 0;
+            el.headerStatImage.textContent = stats.image_count || 0;
+            el.headerStatDoc.textContent = stats.doc_count || 0;
+            el.headerStatVideo.textContent = stats.video_count || 0;
+            el.headerStatOther.textContent = stats.other_count || 0;
         }
 
         // 创建文件项HTML
@@ -1265,10 +1298,10 @@
                 return;
             }
 
-            const quality = parseInt(document.getElementById('quality').value);
+            const quality = parseInt(el.quality.value);
             const filePaths = selectedFiles.map(f => f.path);
-            const workDir = document.getElementById('workDir').value;
-            const overwrite = document.getElementById('overwrite').checked;
+            const workDir = el.workDir.value;
+            const overwrite = el.overwrite.checked;
 
             // 显示进度条
             el.compressProgress.style.display = 'block';
@@ -1416,8 +1449,14 @@
             return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
         }
 
-        // 页面加载时自动加载文件
-        window.onload = loadFiles;
+        // 初始化应用
+        function initApp() {
+            initEventListeners();
+            loadFiles();
+        }
+
+        // 页面加载时初始化应用
+        window.onload = initApp;
     </script>
 </body>
 </html>
