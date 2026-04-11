@@ -112,7 +112,7 @@ jobs:
           
           Write-Host "构建 Windows 窗口应用版本..."
           # 使用 -H=windowsgui 标志构建窗口应用，不显示控制台
-          go build -v -ldflags="-H=windowsgui -s -w" -o knimg-windows-amd64.exe .
+          go build -v -ldflags="-H=windowsgui -s -w" -trimpath -o knimg-windows-amd64.exe .
           
           # 检查构建结果
           Write-Host "\n=== 构建产物 ==="
@@ -134,10 +134,10 @@ jobs:
           export CGO_ENABLED=1
           
           echo "构建 macOS AMD64 版本..."
-          go build -v -ldflags="-s -w" -o knimg-darwin-amd64 .
+          go build -v -ldflags="-s -w" -trimpath -o knimg-darwin-amd64 .
           
           echo "构建 macOS ARM64 版本..."
-          GOARCH=arm64 go build -v -ldflags="-s -w" -o knimg-darwin-arm64 .
+          GOARCH=arm64 go build -v -ldflags="-s -w" -trimpath -o knimg-darwin-arm64 .
           
           # 创建 macOS 应用程序包 (AMD64)
           echo "\n=== 创建 macOS 应用程序包 (AMD64) ==="
@@ -244,13 +244,13 @@ jobs:
           echo "开始编译..."
           
           # 尝试构建，即使缺少某些依赖
-          if go build -v -ldflags="-s -w" -o knimg-linux-amd64 .; then
+          if go build -v -ldflags="-s -w" -trimpath -o knimg-linux-amd64 .; then
             echo "✓ Linux 构建成功"
           else
             echo "⚠ 构建失败，尝试禁用 CGO..."
             # 尝试禁用 CGO
             export CGO_ENABLED=0
-            if go build -v -ldflags="-s -w" -o knimg-linux-amd64 .; then
+            if go build -v -ldflags="-s -w" -trimpath -o knimg-linux-amd64 .; then
               echo "✓ Linux 构建成功 (禁用 CGO)"
             else
               echo "✗ 所有构建尝试失败"
