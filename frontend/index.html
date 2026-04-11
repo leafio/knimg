@@ -371,6 +371,17 @@
         .size-input { width: 100px; }
         .dir-input { min-width: 280px; }
 
+        /* 扩展名下拉列表样式 */
+        .filter-group { position: relative; }
+        .ext-dropdown-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .ext-dropdown-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+        }
+
         /* 工具栏 */
         .toolbar {
             display: flex;
@@ -912,20 +923,17 @@
                         <input type="text" id="searchInput" class="search-input" placeholder="输入文件名..." oninput="applyFilters()">
                     </div>
                     <div class="filter-group">
-                        <label>📁 文件类型:</label>
-                        <select id="extFilter" onchange="selectExtension(this.value)">
-                            <option value="">选择扩展名</option>
-                            <option value="jpg,jpeg,png,gif,webp">图片 (jpg,jpeg,png,gif,webp)</option>
-                            <option value="doc,docx,xls,xlsx,ppt,pptx,pdf">文档 (doc,docx,xls,xlsx,ppt,pptx,pdf)</option>
-                            <option value="mp4,avi,mov,wmv,flv">视频 (mp4,avi,mov,wmv,flv)</option>
-                            <option value="js,ts,jsx,tsx,html,css,scss">前端 (js,ts,jsx,tsx,html,css,scss)</option>
-                            <option value="py,java,c,cpp,cs,php,go,rust">后端 (py,java,c,cpp,cs,php,go,rust)</option>
-                            <option value="zip,rar,7z,tar,gz">压缩包 (zip,rar,7z,tar,gz)</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <label>📝 扩展名:</label>
+                        <label>📁 扩展名:</label>
                         <input type="text" id="fileExt" class="search-input" placeholder="js,ts,py" oninput="applyFilters()">
+                        <button class="browse-btn" id="extDropdownBtn" onclick="toggleExtDropdown()">▼</button>
+                    </div>
+                    <div id="extDropdown" class="ext-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border); border-radius: 6px; box-shadow: var(--shadow-sm); z-index: 100; max-height: 300px; overflow-y: auto;">
+                        <div class="ext-dropdown-item" onclick="selectExtension('jpg,jpeg,png,gif,webp')">图片 (jpg,jpeg,png,gif,webp)</div>
+                        <div class="ext-dropdown-item" onclick="selectExtension('doc,docx,xls,xlsx,ppt,pptx,pdf')">文档 (doc,docx,xls,xlsx,ppt,pptx,pdf)</div>
+                        <div class="ext-dropdown-item" onclick="selectExtension('mp4,avi,mov,wmv,flv')">视频 (mp4,avi,mov,wmv,flv)</div>
+                        <div class="ext-dropdown-item" onclick="selectExtension('js,ts,jsx,tsx,html,css,scss')">前端 (js,ts,jsx,tsx,html,css,scss)</div>
+                        <div class="ext-dropdown-item" onclick="selectExtension('py,java,c,cpp,cs,php,go,rust')">后端 (py,java,c,cpp,cs,php,go,rust)</div>
+                        <div class="ext-dropdown-item" onclick="selectExtension('zip,rar,7z,tar,gz')">压缩包 (zip,rar,7z,tar,gz)</div>
                     </div>
                     <div class="filter-group">
                         <label>📊 排序:</label>
@@ -1017,8 +1025,9 @@
             qualityValue: document.getElementById('qualityValue'),
             workDir: document.getElementById('workDir'),
             searchInput: document.getElementById('searchInput'),
-            extFilter: document.getElementById('extFilter'),
             fileExt: document.getElementById('fileExt'),
+            extDropdownBtn: document.getElementById('extDropdownBtn'),
+            extDropdown: document.getElementById('extDropdown'),
             minSize: document.getElementById('minSize'),
             maxSize: document.getElementById('maxSize'),
             sortBy: document.getElementById('sortBy'),
@@ -1041,11 +1050,27 @@
             el.directoryModal.addEventListener('click', e => {
                 if (e.target === el.directoryModal) closeDirectoryBrowser();
             });
+
+            // 点击外部关闭扩展名下拉列表
+            document.addEventListener('click', function(e) {
+                if (!el.extDropdown.contains(e.target) && 
+                    !el.extDropdownBtn.contains(e.target) && 
+                    el.extDropdown.style.display !== 'none') {
+                    el.extDropdown.style.display = 'none';
+                }
+            });
+        }
+
+        // 切换扩展名下拉列表
+        function toggleExtDropdown() {
+            const isHidden = el.extDropdown.style.display === 'none';
+            el.extDropdown.style.display = isHidden ? 'block' : 'none';
         }
 
         // 选择扩展名
         function selectExtension(extensions) {
             el.fileExt.value = extensions;
+            el.extDropdown.style.display = 'none';
             applyFilters();
         }
 
@@ -1212,7 +1237,7 @@
             el.fileExt.value = '';
             el.minSize.value = '';
             el.maxSize.value = '';
-            el.extFilter.value = '';
+            el.extDropdown.style.display = 'none';
             el.sortBy.value = 'name';
             el.sortOrder.value = 'asc';
             applyFilters();
