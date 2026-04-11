@@ -922,18 +922,18 @@
                         <label>🔍 名称搜索:</label>
                         <input type="text" id="searchInput" class="search-input" placeholder="输入文件名..." oninput="applyFilters()">
                     </div>
-                    <div class="filter-group">
+                    <div class="filter-group" style="position: relative;">
                         <label>📁 扩展名:</label>
                         <input type="text" id="fileExt" class="search-input" placeholder="js,ts,py" oninput="applyFilters()">
                         <button class="browse-btn" id="extDropdownBtn" onclick="toggleExtDropdown()">▼</button>
-                    </div>
-                    <div id="extDropdown" class="ext-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border); border-radius: 6px; box-shadow: var(--shadow-sm); z-index: 100; max-height: 300px; overflow-y: auto;">
-                        <div class="ext-dropdown-item" onclick="selectExtension('jpg,jpeg,png,gif,webp')">图片 (jpg,jpeg,png,gif,webp)</div>
-                        <div class="ext-dropdown-item" onclick="selectExtension('doc,docx,xls,xlsx,ppt,pptx,pdf')">文档 (doc,docx,xls,xlsx,ppt,pptx,pdf)</div>
-                        <div class="ext-dropdown-item" onclick="selectExtension('mp4,avi,mov,wmv,flv')">视频 (mp4,avi,mov,wmv,flv)</div>
-                        <div class="ext-dropdown-item" onclick="selectExtension('js,ts,jsx,tsx,html,css,scss')">前端 (js,ts,jsx,tsx,html,css,scss)</div>
-                        <div class="ext-dropdown-item" onclick="selectExtension('py,java,c,cpp,cs,php,go,rust')">后端 (py,java,c,cpp,cs,php,go,rust)</div>
-                        <div class="ext-dropdown-item" onclick="selectExtension('zip,rar,7z,tar,gz')">压缩包 (zip,rar,7z,tar,gz)</div>
+                        <div id="extDropdown" class="ext-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border); border-radius: 6px; box-shadow: var(--shadow-sm); z-index: 100; max-height: 300px; overflow-y: auto;">
+                            <div class="ext-dropdown-item" onclick="selectExtension('jpg,jpeg,png,gif,webp')">图片 (jpg,jpeg,png,gif,webp)</div>
+                            <div class="ext-dropdown-item" onclick="selectExtension('doc,docx,xls,xlsx,ppt,pptx,pdf')">文档 (doc,docx,xls,xlsx,ppt,pptx,pdf)</div>
+                            <div class="ext-dropdown-item" onclick="selectExtension('mp4,avi,mov,wmv,flv')">视频 (mp4,avi,mov,wmv,flv)</div>
+                            <div class="ext-dropdown-item" onclick="selectExtension('js,ts,jsx,tsx,html,css,scss')">前端 (js,ts,jsx,tsx,html,css,scss)</div>
+                            <div class="ext-dropdown-item" onclick="selectExtension('py,java,c,cpp,cs,php,go,rust')">后端 (py,java,c,cpp,cs,php,go,rust)</div>
+                            <div class="ext-dropdown-item" onclick="selectExtension('zip,rar,7z,tar,gz')">压缩包 (zip,rar,7z,tar,gz)</div>
+                        </div>
                     </div>
                     <div class="filter-group">
                         <label>📊 排序:</label>
