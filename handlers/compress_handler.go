@@ -13,8 +13,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-
-	"github.com/gin-gonic/gin"
 )
 
 // CompressHandler 图片压缩处理器
@@ -30,10 +28,17 @@ func NewCompressHandler(baseDir string) *CompressHandler {
 }
 
 // CompressFiles 批量压缩图片（支持流式进度）
-func (h *CompressHandler) CompressFiles(c *gin.Context) {
+func (h *CompressHandler) CompressFiles(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	var req models.CompressRequest
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
 			"success": false,
 			"message": "请求参数错误",
 		})
@@ -41,7 +46,9 @@ func (h *CompressHandler) CompressFiles(c *gin.Context) {
 	}
 
 	if len(req.Files) == 0 {
-		c.JSON(http.StatusBadRequest, gin.H{
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
 			"success": false,
 			"message": "未选择要压缩的文件",
 		})
@@ -62,7 +69,9 @@ func (h *CompressHandler) CompressFiles(c *gin.Context) {
 
 	// 验证工作目录存在
 	if _, err := os.Stat(workDir); os.IsNotExist(err) {
-		c.JSON(http.StatusBadRequest, gin.H{
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
 			"success": false,
 			"message": "工作目录不存在: " + workDir,
 		})
@@ -75,7 +84,9 @@ func (h *CompressHandler) CompressFiles(c *gin.Context) {
 	// 创建输出目录（如果不覆盖原文件）
 	if !req.Overwrite {
 		if err := os.MkdirAll(outputDir, 0755); err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusInternalServerError)
+			json.NewEncoder(w).Encode(map[string]interface{}{
 				"success": false,
 				"message": "无法创建输出目录",
 			})
@@ -84,8 +95,8 @@ func (h *CompressHandler) CompressFiles(c *gin.Context) {
 	}
 
 	// 设置响应头为流式
-	c.Header("Content-Type", "text/plain; charset=utf-8")
-	c.Header("X-Content-Type-Options", "nosniff")
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Set("X-Content-Type-Options", "nosniff")
 
 	var totalOrigSize, totalNewSize int64
 	var successCount int
@@ -100,7 +111,7 @@ func (h *CompressHandler) CompressFiles(c *gin.Context) {
 		if os.IsNotExist(err) {
 			failedFiles = append(failedFiles, filePath+" (文件不存在)")
 			// 更新进度
-			h.updateProgress(c, i+1, fileCount)
+			h.updateProgress(w, i+1, fileCount)
 			continue
 		}
 
@@ -122,15 +133,18 @@ func (h *CompressHandler) CompressFiles(c *gin.Context) {
 		}
 
 		// 更新进度
-		h.updateProgress(c, i+1, fileCount)
+		h.updateProgress(w, i+1, fileCount)
 	}
 
 	// 构建响应
 	response := h.buildResponse(successCount, totalOrigSize, totalNewSize, outputDir, workDir, failedFiles)
 
 	// 发送最终响应
-	fmt.Fprintf(c.Writer, "data:%s\n", toJSON(response))
-	c.Writer.Flush()
+	fmt.Fprintf(w, "data:%s\n", toJSON(response))
+	flusher, ok := w.(http.Flusher)
+	if ok {
+		flusher.Flush()
+	}
 }
 
 // getOutputDir 获取输出目录
@@ -147,15 +161,18 @@ func (h *CompressHandler) getOutputDir(workDir, outputDir string, overwrite bool
 }
 
 // updateProgress 更新压缩进度
-func (h *CompressHandler) updateProgress(c *gin.Context, current, total int) {
+func (h *CompressHandler) updateProgress(w http.ResponseWriter, current, total int) {
 	progress := current * 100 / total
-	fmt.Fprintf(c.Writer, "progress:%d\n", progress)
-	c.Writer.Flush()
+	fmt.Fprintf(w, "progress:%d\n", progress)
+	flusher, ok := w.(http.Flusher)
+	if ok {
+		flusher.Flush()
+	}
 }
 
 // buildResponse 构建响应对象
-func (h *CompressHandler) buildResponse(successCount int, totalOrigSize, totalNewSize int64, outputDir, workDir string, failedFiles []string) gin.H {
-	response := gin.H{
+func (h *CompressHandler) buildResponse(successCount int, totalOrigSize, totalNewSize int64, outputDir, workDir string, failedFiles []string) map[string]interface{} {
+	response := map[string]interface{}{
 		"success":     true,
 		"message":     fmt.Sprintf("成功压缩 %d 个图片", successCount),
 		"output_path": outputDir,
@@ -305,18 +322,25 @@ func (h *CompressHandler) compressImage(inputPath, outputDir string, quality int
 }
 
 // GetCompressionStats 获取压缩统计信息
-func (h *CompressHandler) GetCompressionStats(c *gin.Context) {
+func (h *CompressHandler) GetCompressionStats(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	// 支持自定义压缩目录
-	compressedDir := c.Query("compressed_dir")
+	compressedDir := r.URL.Query().Get("compressed_dir")
 	if compressedDir == "" {
 		compressedDir = filepath.Join(h.BaseDir, "compressed")
 	}
 
 	// 检查压缩目录是否存在
 	if _, err := os.Stat(compressedDir); os.IsNotExist(err) {
-		c.JSON(http.StatusOK, gin.H{
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		json.NewEncoder(w).Encode(map[string]interface{}{
 			"success": true,
-			"data": gin.H{
+			"data": map[string]interface{}{
 				"total_files": 0,
 				"total_size":  0,
 			},
@@ -327,9 +351,11 @@ func (h *CompressHandler) GetCompressionStats(c *gin.Context) {
 	// 扫描压缩后的文件
 	totalFiles, totalSize := h.scanDirectory(compressedDir)
 
-	c.JSON(http.StatusOK, gin.H{
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
 		"success": true,
-		"data": gin.H{
+		"data": map[string]interface{}{
 			"total_files": totalFiles,
 			"total_size":  totalSize,
 		},

@@ -12,7 +12,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/tealeg/xlsx/v3"
 )
 
@@ -29,21 +28,35 @@ func NewFileHandler(baseDir string) *FileHandler {
 }
 
 // ListFiles 获取文件列表（支持筛选和排序）
-func (h *FileHandler) ListFiles(c *gin.Context) {
-	var req models.FileListRequest
-	if err := c.ShouldBindQuery(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "请求参数错误: " + err.Error(),
-		})
+func (h *FileHandler) ListFiles(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
 
-	workDir := h.getWorkDir(c.Query("work_dir"))
+	var req models.FileListRequest
+	// 手动绑定查询参数
+	req.Search = r.URL.Query().Get("search")
+	req.FileType = r.URL.Query().Get("file_type")
+	req.FileExt = r.URL.Query().Get("file_ext")
+	req.SortBy = r.URL.Query().Get("sort_by")
+	req.SortOrder = r.URL.Query().Get("sort_order")
+
+	// 解析大小参数
+	if minSize := r.URL.Query().Get("min_size"); minSize != "" {
+		fmt.Sscanf(minSize, "%d", &req.MinSize)
+	}
+	if maxSize := r.URL.Query().Get("max_size"); maxSize != "" {
+		fmt.Sscanf(maxSize, "%d", &req.MaxSize)
+	}
+
+	workDir := h.getWorkDir(r.URL.Query().Get("work_dir"))
 	
 	files, err := h.scanFilesWithFilter(workDir, &req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
 			"success": false,
 			"message": err.Error(),
 		})
@@ -53,7 +66,9 @@ func (h *FileHandler) ListFiles(c *gin.Context) {
 	// 计算统计信息
 	stats := h.calculateStats(files)
 
-	c.JSON(http.StatusOK, gin.H{
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
 		"success":   true,
 		"data":      files,
 		"total":     len(files),
@@ -240,21 +255,28 @@ func getFileType(filename string) string {
 }
 
 // ExportFiles 导出文件列表
-func (h *FileHandler) ExportFiles(c *gin.Context) {
-	format := c.Query("format")
+func (h *FileHandler) ExportFiles(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	format := r.URL.Query().Get("format")
 	if format == "" {
 		format = "excel"
 	}
 
 	// 支持自定义导出目录
-	exportDir := c.Query("export_dir")
+	exportDir := r.URL.Query().Get("export_dir")
 	if exportDir == "" {
 		exportDir = h.BaseDir
 	}
 
 	// 创建导出目录
 	if err := os.MkdirAll(exportDir, 0755); err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
 			"success": false,
 			"message": "无法创建导出目录: " + err.Error(),
 		})
@@ -263,13 +285,28 @@ func (h *FileHandler) ExportFiles(c *gin.Context) {
 
 	// 获取筛选参数
 	var req models.FileListRequest
-	c.ShouldBindQuery(&req)
+	// 手动绑定查询参数
+	req.Search = r.URL.Query().Get("search")
+	req.FileType = r.URL.Query().Get("file_type")
+	req.FileExt = r.URL.Query().Get("file_ext")
+	req.SortBy = r.URL.Query().Get("sort_by")
+	req.SortOrder = r.URL.Query().Get("sort_order")
 
-	workDir := h.getWorkDir(c.Query("work_dir"))
+	// 解析大小参数
+	if minSize := r.URL.Query().Get("min_size"); minSize != "" {
+		fmt.Sscanf(minSize, "%d", &req.MinSize)
+	}
+	if maxSize := r.URL.Query().Get("max_size"); maxSize != "" {
+		fmt.Sscanf(maxSize, "%d", &req.MaxSize)
+	}
+
+	workDir := h.getWorkDir(r.URL.Query().Get("work_dir"))
 
 	files, err := h.scanFilesWithFilter(workDir, &req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
 			"success": false,
 			"message": err.Error(),
 		})
@@ -285,7 +322,9 @@ func (h *FileHandler) ExportFiles(c *gin.Context) {
 	case "json":
 		filePath, err = h.exportToJSON(files, exportDir)
 	default:
-		c.JSON(http.StatusBadRequest, gin.H{
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
 			"success": false,
 			"message": "不支持的导出格式",
 		})
@@ -293,14 +332,18 @@ func (h *FileHandler) ExportFiles(c *gin.Context) {
 	}
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
 			"success": false,
 			"message": err.Error(),
 		})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
 		"success":    true,
 		"file_path":  filePath,
 		"export_dir": exportDir,
@@ -398,20 +441,33 @@ func (h *FileHandler) exportToJSON(files []models.FileInfo, exportDir string) (s
 }
 
 // GetHomeDirectory 获取用户主目录
-func (h *FileHandler) GetHomeDirectory(c *gin.Context) {
+func (h *FileHandler) GetHomeDirectory(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
 		homeDir = "/"
 	}
-	c.JSON(http.StatusOK, gin.H{
+
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
 		"success": true,
 		"path":    homeDir,
 	})
 }
 
 // BrowseDirectory 浏览目录
-func (h *FileHandler) BrowseDirectory(c *gin.Context) {
-	dirPath := c.Query("path")
+func (h *FileHandler) BrowseDirectory(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	dirPath := r.URL.Query().Get("path")
 	if dirPath == "" {
 		homeDir, err := os.UserHomeDir()
 		if err != nil {
@@ -424,7 +480,9 @@ func (h *FileHandler) BrowseDirectory(c *gin.Context) {
 	// 验证目录存在
 	info, err := os.Stat(dirPath)
 	if os.IsNotExist(err) {
-		c.JSON(http.StatusBadRequest, gin.H{
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
 			"success": false,
 			"message": "目录不存在",
 		})
@@ -432,7 +490,9 @@ func (h *FileHandler) BrowseDirectory(c *gin.Context) {
 	}
 
 	if !info.IsDir() {
-		c.JSON(http.StatusBadRequest, gin.H{
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		json.NewEncoder(w).Encode(map[string]interface{}{
 			"success": false,
 			"message": "不是目录",
 		})
@@ -441,7 +501,9 @@ func (h *FileHandler) BrowseDirectory(c *gin.Context) {
 
 	entries, err := os.ReadDir(dirPath)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		json.NewEncoder(w).Encode(map[string]interface{}{
 			"success": false,
 			"message": err.Error(),
 		})
@@ -460,7 +522,9 @@ func (h *FileHandler) BrowseDirectory(c *gin.Context) {
 		}
 	}
 
-	c.JSON(http.StatusOK, gin.H{
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
 		"success":     true,
 		"current_path": dirPath,
 		"directories":  directories,

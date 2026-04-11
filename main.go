@@ -3,8 +3,10 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -12,7 +14,6 @@ import (
 
 	"knimg/handlers"
 
-	"github.com/gin-gonic/gin"
 	webview "github.com/webview/webview_go"
 )
 
@@ -64,6 +65,22 @@ func logAndExit(msg string) {
 	os.Exit(1)
 }
 
+// withCORS 添加 CORS 中间件
+func withCORS(next http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		
+		if r.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusNoContent)
+			return
+		}
+		
+		next(w, r)
+	}
+}
+
 func main() {
 	// 初始化日志
 	fmt.Println("=== KnImg 启动 ===")
@@ -94,48 +111,20 @@ func main() {
 	fileHandler := handlers.NewFileHandler(baseDir)
 	compressHandler := handlers.NewCompressHandler(baseDir)
 
-	// 创建 Gin 路由器
-	r := gin.Default()
-
-	// 启用 CORS
-	r.Use(func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
-			return
-		}
-	})
-
-	// API 路由
-	api := r.Group("/api")
-	{
-		// 文件列表
-		api.GET("/files", fileHandler.ListFiles)
-
-		// 导出文件列表
-		api.GET("/files/export", fileHandler.ExportFiles)
-
-		// 目录浏览
-		api.GET("/directory/home", fileHandler.GetHomeDirectory)
-		api.GET("/directory/browse", fileHandler.BrowseDirectory)
-
-		// 批量压缩图片
-		api.POST("/compress", compressHandler.CompressFiles)
-
-		// 获取压缩统计
-		api.GET("/compress/stats", compressHandler.GetCompressionStats)
-	}
+	// 创建多路复用器
+	mux := http.NewServeMux()
 
 	// 静态文件服务
-	r.Static("/uploads", uploadDir)
+	uploadsHandler := http.StripPrefix("/uploads", http.FileServer(http.Dir(uploadDir)))
+	mux.Handle("/uploads/", uploadsHandler)
+
 	compressedDir := filepath.Join(baseDir, "compressed")
 	log.Printf("压缩目录: %s", compressedDir)
 	if err := os.MkdirAll(compressedDir, 0755); err != nil {
 		log.Fatalf("无法创建压缩目录: %v", err)
 	}
-	r.Static("/compressed", compressedDir)
+	compressedHandler := http.StripPrefix("/compressed", http.FileServer(http.Dir(compressedDir)))
+	mux.Handle("/compressed/", compressedHandler)
 
 	// 检查是否为开发模式
 	execPath, _ := os.Executable()
@@ -150,7 +139,8 @@ func main() {
 		fmt.Printf("开发模式 - 使用本地前端目录: %s\n", frontendDir)
 
 		// 提供前端静态文件
-		r.Static("/", frontendDir)
+		frontendHandler := http.FileServer(http.Dir(frontendDir))
+		mux.Handle("/", frontendHandler)
 		fmt.Println("✓ 本地前端资源加载成功")
 		log.Println("✓ 本地前端资源加载成功")
 	} else {
@@ -159,11 +149,24 @@ func main() {
 		log.Println("✓ 嵌入前端资源加载成功")
 
 		// 提供嵌入的前端index.html
-		r.GET("/", func(c *gin.Context) {
-			// 生产模式下会使用嵌入的资源
-			c.Data(200, "text/html; charset=utf-8", indexHTMLContent)
+		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+			if r.URL.Path == "/" {
+				w.Header().Set("Content-Type", "text/html; charset=utf-8")
+				w.WriteHeader(http.StatusOK)
+				w.Write(indexHTMLContent)
+			} else {
+				http.NotFound(w, r)
+			}
 		})
 	}
+
+	// API 路由
+	mux.HandleFunc("/api/files", withCORS(fileHandler.ListFiles))
+	mux.HandleFunc("/api/files/export", withCORS(fileHandler.ExportFiles))
+	mux.HandleFunc("/api/directory/home", withCORS(fileHandler.GetHomeDirectory))
+	mux.HandleFunc("/api/directory/browse", withCORS(fileHandler.BrowseDirectory))
+	mux.HandleFunc("/api/compress", withCORS(compressHandler.CompressFiles))
+	mux.HandleFunc("/api/compress/stats", withCORS(compressHandler.GetCompressionStats))
 
 	// 启动服务器
 	port := "8080"
@@ -185,7 +188,11 @@ func main() {
 
 	// 在goroutine中启动服务器
 	go func() {
-		if err := r.Run(":" + port); err != nil {
+		server := &http.Server{
+			Addr:    ":" + port,
+			Handler: mux,
+		}
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("服务器启动失败: %v", err)
 		}
 	}()
