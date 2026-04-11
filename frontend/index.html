@@ -897,6 +897,11 @@
                         <button class="browse-btn" onclick="openDirectoryBrowser('workDir')">📁 浏览</button>
                     </div>
                     <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                        <div class="filter-group">
+                            <label>📁 输出目录:</label>
+                            <input type="text" id="outputDir" class="dir-input" placeholder="选择输出目录">
+                            <button class="browse-btn" onclick="openDirectoryBrowser('outputDir')">📁 浏览</button>
+                        </div>
                         <div class="quality-slider">
                             <label>压缩质量:</label>
                             <input type="range" id="quality" min="10" max="100" value="80">
@@ -1024,6 +1029,7 @@
             quality: document.getElementById('quality'),
             qualityValue: document.getElementById('qualityValue'),
             workDir: document.getElementById('workDir'),
+            outputDir: document.getElementById('outputDir'),
             searchInput: document.getElementById('searchInput'),
             fileExt: document.getElementById('fileExt'),
             extDropdownBtn: document.getElementById('extDropdownBtn'),
@@ -1337,6 +1343,7 @@
             const quality = parseInt(el.quality.value);
             const filePaths = selectedFiles.map(f => f.path);
             const workDir = el.workDir.value;
+            const outputDir = el.outputDir.value;
             const overwrite = el.overwrite.checked;
 
             // 显示进度条
@@ -1355,6 +1362,7 @@
                         files: filePaths,
                         quality: quality,
                         work_dir: workDir,
+                        output_dir: outputDir,
                         overwrite: overwrite
                     })
                 });
