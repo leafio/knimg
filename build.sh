@@ -36,15 +36,16 @@ if [ $? -eq 0 ]; then
     
     # 创建 macOS 应用程序包 (AMD64)
     echo "创建 macOS 应用程序包 (AMD64)..."
-    # 删除现有的应用程序包，确保创建全新的包
-    rm -rf build/KnImg-amd64.app
-    mkdir -p build/KnImg-amd64.app/Contents/MacOS
-    mkdir -p build/KnImg-amd64.app/Contents/Resources
-    cp build/knimg-darwin-amd64 build/KnImg-amd64.app/Contents/MacOS/
-    chmod +x build/KnImg-amd64.app/Contents/MacOS/knimg-darwin-amd64
+    # 使用临时目录，确保构建失败时不会影响现有版本
+    temp_app_dir="build/KnImg-amd64.app.tmp"
+    rm -rf "$temp_app_dir"
+    mkdir -p "$temp_app_dir/Contents/MacOS"
+    mkdir -p "$temp_app_dir/Contents/Resources"
+    cp build/knimg-darwin-amd64 "$temp_app_dir/Contents/MacOS/"
+    chmod +x "$temp_app_dir/Contents/MacOS/knimg-darwin-amd64"
     
     # 创建 Info.plist
-    cat > build/KnImg-amd64.app/Contents/Info.plist << EOF
+    cat > "$temp_app_dir/Contents/Info.plist" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -64,8 +65,17 @@ if [ $? -eq 0 ]; then
 EOF
     
     # 压缩应用程序包
-    zip -r build/knimg-macos-amd64.app.zip build/KnImg-amd64.app
-    echo "✓ macOS AMD64 应用程序包创建成功"
+    zip -r build/knimg-macos-amd64.app.zip "$temp_app_dir"
+    
+    # 只有在所有操作都成功后，才替换现有应用程序包
+    if [ $? -eq 0 ]; then
+        rm -rf build/KnImg-amd64.app
+        mv "$temp_app_dir" build/KnImg-amd64.app
+        echo "✓ macOS AMD64 应用程序包创建成功"
+    else
+        echo "✗ macOS AMD64 应用程序包压缩失败"
+        rm -rf "$temp_app_dir"
+    fi
 else
     echo "✗ Mac 64位构建失败"
 fi
@@ -79,15 +89,16 @@ if [ $? -eq 0 ]; then
     
     # 创建 macOS 应用程序包 (ARM64)
     echo "创建 macOS 应用程序包 (ARM64)..."
-    # 删除现有的应用程序包，确保创建全新的包
-    rm -rf build/KnImg-arm64.app
-    mkdir -p build/KnImg-arm64.app/Contents/MacOS
-    mkdir -p build/KnImg-arm64.app/Contents/Resources
-    cp build/knimg-darwin-arm64 build/KnImg-arm64.app/Contents/MacOS/
-    chmod +x build/KnImg-arm64.app/Contents/MacOS/knimg-darwin-arm64
+    # 使用临时目录，确保构建失败时不会影响现有版本
+    temp_app_dir="build/KnImg-arm64.app.tmp"
+    rm -rf "$temp_app_dir"
+    mkdir -p "$temp_app_dir/Contents/MacOS"
+    mkdir -p "$temp_app_dir/Contents/Resources"
+    cp build/knimg-darwin-arm64 "$temp_app_dir/Contents/MacOS/"
+    chmod +x "$temp_app_dir/Contents/MacOS/knimg-darwin-arm64"
     
     # 创建 Info.plist
-    cat > build/KnImg-arm64.app/Contents/Info.plist << EOF
+    cat > "$temp_app_dir/Contents/Info.plist" << EOF
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -107,8 +118,17 @@ if [ $? -eq 0 ]; then
 EOF
     
     # 压缩应用程序包
-    zip -r build/knimg-macos-arm64.app.zip build/KnImg-arm64.app
-    echo "✓ macOS ARM64 应用程序包创建成功"
+    zip -r build/knimg-macos-arm64.app.zip "$temp_app_dir"
+    
+    # 只有在所有操作都成功后，才替换现有应用程序包
+    if [ $? -eq 0 ]; then
+        rm -rf build/KnImg-arm64.app
+        mv "$temp_app_dir" build/KnImg-arm64.app
+        echo "✓ macOS ARM64 应用程序包创建成功"
+    else
+        echo "✗ macOS ARM64 应用程序包压缩失败"
+        rm -rf "$temp_app_dir"
+    fi
 else
     echo "✗ Mac ARM64位构建失败"
 fi
