@@ -6,7 +6,8 @@ import (
 	"image"
 	"image/jpeg"
 	"image/png"
-	_ "image/gif" // 支持 gif
+	_ "image/gif"       // 支持 gif
+	_ "golang.org/x/image/webp" // 支持 webp
 	"knimg/models"
 	"net/http"
 	"os"
@@ -69,10 +70,7 @@ func (h *CompressHandler) CompressFiles(c *gin.Context) {
 	}
 
 	// 设置输出目录
-	outputDir := req.OutputDir
-	if outputDir == "" {
-		outputDir = filepath.Join(workDir, "compressed")
-	}
+	outputDir := h.getOutputDir(workDir, req.OutputDir, req.Overwrite)
 
 	// 创建输出目录（如果不覆盖原文件）
 	if !req.Overwrite {
@@ -102,9 +100,7 @@ func (h *CompressHandler) CompressFiles(c *gin.Context) {
 		if os.IsNotExist(err) {
 			failedFiles = append(failedFiles, filePath+" (文件不存在)")
 			// 更新进度
-			progress := (i + 1) * 100 / fileCount
-			fmt.Fprintf(c.Writer, "progress:%d\n", progress)
-			c.Writer.Flush()
+			h.updateProgress(c, i+1, fileCount)
 			continue
 		}
 
@@ -126,12 +122,39 @@ func (h *CompressHandler) CompressFiles(c *gin.Context) {
 		}
 
 		// 更新进度
-		progress := (i + 1) * 100 / fileCount
-		fmt.Fprintf(c.Writer, "progress:%d\n", progress)
-		c.Writer.Flush()
+		h.updateProgress(c, i+1, fileCount)
 	}
 
 	// 构建响应
+	response := h.buildResponse(successCount, totalOrigSize, totalNewSize, outputDir, workDir, failedFiles)
+
+	// 发送最终响应
+	fmt.Fprintf(c.Writer, "data:%s\n", toJSON(response))
+	c.Writer.Flush()
+}
+
+// getOutputDir 获取输出目录
+func (h *CompressHandler) getOutputDir(workDir, outputDir string, overwrite bool) string {
+	if outputDir != "" {
+		return outputDir
+	}
+
+	if overwrite {
+		return workDir
+	}
+
+	return filepath.Join(workDir, "compressed")
+}
+
+// updateProgress 更新压缩进度
+func (h *CompressHandler) updateProgress(c *gin.Context, current, total int) {
+	progress := current * 100 / total
+	fmt.Fprintf(c.Writer, "progress:%d\n", progress)
+	c.Writer.Flush()
+}
+
+// buildResponse 构建响应对象
+func (h *CompressHandler) buildResponse(successCount int, totalOrigSize, totalNewSize int64, outputDir, workDir string, failedFiles []string) gin.H {
 	response := gin.H{
 		"success":     true,
 		"message":     fmt.Sprintf("成功压缩 %d 个图片", successCount),
@@ -147,9 +170,7 @@ func (h *CompressHandler) CompressFiles(c *gin.Context) {
 		response["failed_count"] = len(failedFiles)
 	}
 
-	// 发送最终响应
-	fmt.Fprintf(c.Writer, "data:%s\n", toJSON(response))
-	c.Writer.Flush()
+	return response
 }
 
 // toJSON 转换为 JSON 字符串
@@ -214,10 +235,13 @@ func (h *CompressHandler) compressImage(inputPath, outputDir string, quality int
 
 	// 智能格式选择：WebP 统一转为 JPEG 以获得更好兼容性
 	// PNG 保持 PNG（无损），其他转为 JPEG
-	outputPath := filepath.Join(outputDir, filename)
+	outputPath := inputPath
+	if !overwrite {
+		outputPath = filepath.Join(outputDir, filename)
+	}
 
 	// 如果是覆盖原文件，先删除原文件
-	if overwrite && inputPath == outputPath {
+	if overwrite {
 		if err := os.Remove(inputPath); err != nil {
 			return 0, err
 		}
@@ -230,62 +254,54 @@ func (h *CompressHandler) compressImage(inputPath, outputDir string, quality int
 	defer outputFile.Close()
 
 	// 根据格式保存图片
-	var newSize int64
 	switch strings.ToLower(format) {
 	case "jpeg", "jpg":
 		err = jpeg.Encode(outputFile, img, &jpeg.Options{Quality: quality})
-		if err == nil {
-			fileInfo, _ := os.Stat(outputPath)
-			newSize = fileInfo.Size()
-		}
 	case "png":
 		// PNG 使用最佳压缩，保持无损
 		err = png.Encode(outputFile, img)
-		if err == nil {
-			fileInfo, _ := os.Stat(outputPath)
-			newSize = fileInfo.Size()
-		}
-	case "gif":
-		// GIF 转为 JPEG（GIF 压缩效果差）
+	case "gif", "webp":
+		// GIF/WebP 转为 JPEG（GIF 压缩效果差，WebP 兼容性不好）
 		newFilename := strings.TrimSuffix(filename, ext) + ".jpg"
-		outputPath = filepath.Join(outputDir, newFilename)
-		outputFile.Close()
-		
-		newFile, err := os.Create(outputPath)
-		if err != nil {
-			return 0, err
+		if overwrite {
+			outputPath = strings.TrimSuffix(inputPath, ext) + ".jpg"
+		} else {
+			outputPath = filepath.Join(outputDir, newFilename)
+			outputFile.Close()
+
+			outputFile, err = os.Create(outputPath)
+			if err != nil {
+				return 0, err
+			}
+			defer outputFile.Close()
 		}
-		defer newFile.Close()
-		
-		err = jpeg.Encode(newFile, img, &jpeg.Options{Quality: quality})
-		if err == nil {
-			fileInfo, _ := os.Stat(outputPath)
-			newSize = fileInfo.Size()
-		}
+
+		err = jpeg.Encode(outputFile, img, &jpeg.Options{Quality: quality})
 	default:
-		// WebP 等其他格式转为 JPEG
+		// 其他格式转为 JPEG
 		newFilename := strings.TrimSuffix(filename, ext) + ".jpg"
-		outputPath = filepath.Join(outputDir, newFilename)
-		outputFile.Close()
-		
-		newFile, err := os.Create(outputPath)
-		if err != nil {
-			return 0, err
+		if overwrite {
+			outputPath = strings.TrimSuffix(inputPath, ext) + ".jpg"
+		} else {
+			outputPath = filepath.Join(outputDir, newFilename)
+			outputFile.Close()
+
+			outputFile, err = os.Create(outputPath)
+			if err != nil {
+				return 0, err
+			}
+			defer outputFile.Close()
 		}
-		defer newFile.Close()
-		
-		err = jpeg.Encode(newFile, img, &jpeg.Options{Quality: quality})
-		if err == nil {
-			fileInfo, _ := os.Stat(outputPath)
-			newSize = fileInfo.Size()
-		}
+
+		err = jpeg.Encode(outputFile, img, &jpeg.Options{Quality: quality})
 	}
 
 	if err != nil {
 		return 0, err
 	}
 
-	return newSize, nil
+	fileInfo, _ := os.Stat(outputPath)
+	return fileInfo.Size(), nil
 }
 
 // GetCompressionStats 获取压缩统计信息
@@ -309,10 +325,23 @@ func (h *CompressHandler) GetCompressionStats(c *gin.Context) {
 	}
 
 	// 扫描压缩后的文件
+	totalFiles, totalSize := h.scanDirectory(compressedDir)
+
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"data": gin.H{
+			"total_files": totalFiles,
+			"total_size":  totalSize,
+		},
+	})
+}
+
+// scanDirectory 扫描目录统计文件数量和大小
+func (h *CompressHandler) scanDirectory(dirPath string) (int, int64) {
 	var totalFiles int
 	var totalSize int64
 
-	err := filepath.Walk(compressedDir, func(path string, info os.FileInfo, err error) error {
+	filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
@@ -323,19 +352,5 @@ func (h *CompressHandler) GetCompressionStats(c *gin.Context) {
 		return nil
 	})
 
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{
-			"success": false,
-			"message": err.Error(),
-		})
-		return
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"success": true,
-		"data": gin.H{
-			"total_files": totalFiles,
-			"total_size":  totalSize,
-		},
-	})
+	return totalFiles, totalSize
 }

@@ -16,88 +16,78 @@ import (
 	webview "github.com/webview/webview_go"
 )
 
-func main() {
-	// 先输出到控制台
-	fmt.Println("=== KnImg 启动 ===")
-	fmt.Println("启动时间:", time.Now().Format("2006-01-02 15:04:05"))
-
-	// 尝试创建日志文件
-	logPath := "knimg.log"
-	logFile, err := os.Create(logPath)
-	if err != nil {
-		fmt.Printf("无法创建日志文件: %v\n", err)
-		// 继续运行，不使用日志文件
-	} else {
-		defer logFile.Close()
-		log.SetOutput(logFile)
-		fmt.Printf("日志文件路径: %s\n", logPath)
-		log.Printf("日志文件路径: %s", logPath)
-	}
-
-	// 记录启动信息
-	log.Println("=== KnImg 启动 ===")
-	log.Println("启动时间:", time.Now().Format("2006-01-02 15:04:05"))
-
-	var baseDir string
-
-	// 获取当前工作目录
+// getBaseDir 获取基础目录，区分开发和生产模式
+func getBaseDir() string {
 	currentDir, err := os.Getwd()
 	if err != nil {
-		fmt.Printf("错误: 无法获取当前目录: %v\n", err)
-		fmt.Println("按任意键退出...")
-		var input string
-		fmt.Scanln(&input)
-		os.Exit(1)
+		logAndExit(fmt.Sprintf("错误: 无法获取当前目录: %v\n", err))
 	}
 
-	// 获取可执行文件所在目录
 	execPath, err := os.Executable()
 	if err != nil {
 		fmt.Printf("警告: 无法获取可执行文件路径: %v\n", err)
-		baseDir = currentDir
-		fmt.Printf("使用当前目录: %s\n", baseDir)
-		log.Printf("使用当前目录: %s", baseDir)
-	} else {
-		fmt.Printf("可执行文件路径: %s\n", execPath)
-		log.Printf("可执行文件路径: %s", execPath)
+		fmt.Printf("使用当前目录: %s\n", currentDir)
+		log.Printf("使用当前目录: %s", currentDir)
+		return currentDir
+	}
 
-		execDir := filepath.Dir(execPath)
-		
-		// 检查是否在临时目录中运行（开发模式）
-		isDevMode := true || strings.Contains(execPath, "go-build") || 
-		             strings.Contains(execPath, "/Temp/") ||
-		             strings.Contains(execPath, "\\Temp\\")
-		
-		if isDevMode {
-			// 开发模式：使用当前工作目录
-			baseDir = currentDir
-			fmt.Printf("开发模式 - 使用当前工作目录: %s\n", baseDir)
-			log.Printf("开发模式 - 使用当前工作目录: %s", baseDir)
-		} else {
-			// 生产模式：使用可执行文件目录
-			baseDir = execDir
-			fmt.Printf("生产模式 - 使用可执行文件目录: %s\n", baseDir)
-			log.Printf("生产模式 - 使用可执行文件目录: %s", baseDir)
-		}
+	execDir := filepath.Dir(execPath)
+	isDevMode := strings.Contains(execPath, "go-build") ||
+		strings.Contains(execPath, "/Temp/") ||
+		strings.Contains(execPath, "\\Temp\\")
+
+	var baseDir string
+	if isDevMode {
+		baseDir = currentDir
+		fmt.Printf("开发模式 - 使用当前工作目录: %s\n", baseDir)
+		log.Printf("开发模式 - 使用当前工作目录: %s", baseDir)
+	} else {
+		baseDir = execDir
+		fmt.Printf("生产模式 - 使用可执行文件目录: %s\n", baseDir)
+		log.Printf("生产模式 - 使用可执行文件目录: %s", baseDir)
 	}
 
 	// 确保目录存在
 	if _, err := os.Stat(baseDir); os.IsNotExist(err) {
-		fmt.Printf("错误: 可执行文件目录不存在: %s\n", baseDir)
-		fmt.Println("按任意键退出...")
-		var input string
-		fmt.Scanln(&input)
-		os.Exit(1)
+		logAndExit(fmt.Sprintf("错误: 可执行文件目录不存在: %s\n", baseDir))
 	}
 
-	// 创建文件上传目录（如果不存在）
+	return baseDir
+}
+
+// logAndExit 记录错误并退出程序
+func logAndExit(msg string) {
+	fmt.Print(msg)
+	fmt.Println("按任意键退出...")
+	var input string
+	fmt.Scanln(&input)
+	os.Exit(1)
+}
+
+func main() {
+	// 初始化日志
+	fmt.Println("=== KnImg 启动 ===")
+	fmt.Println("启动时间:", time.Now().Format("2006-01-02 15:04:05"))
+
+	logPath := "knimg.log"
+	logFile, err := os.Create(logPath)
+	if err != nil {
+		fmt.Printf("无法创建日志文件: %v\n", err)
+	} else {
+		defer logFile.Close()
+		log.SetOutput(logFile)
+		fmt.Printf("日志文件路径: %s\n", logPath)
+	}
+	log.Println("=== KnImg 启动 ===")
+	log.Println("启动时间:", time.Now().Format("2006-01-02 15:04:05"))
+
+	// 获取基础目录
+	baseDir := getBaseDir()
+
+	// 创建必要的目录
 	uploadDir := filepath.Join(baseDir, "uploads")
 	if err := os.MkdirAll(uploadDir, 0755); err != nil {
-		fmt.Printf("错误: 无法创建上传目录: %v\n", err)
-		fmt.Println("按任意键退出...")
-		var input string
-		fmt.Scanln(&input)
-		os.Exit(1)
+		logAndExit(fmt.Sprintf("错误: 无法创建上传目录: %v\n", err))
 	}
 
 	// 初始化处理器
@@ -123,17 +113,17 @@ func main() {
 	{
 		// 文件列表
 		api.GET("/files", fileHandler.ListFiles)
-		
+
 		// 导出文件列表
 		api.GET("/files/export", fileHandler.ExportFiles)
-		
+
 		// 目录浏览
 		api.GET("/directory/home", fileHandler.GetHomeDirectory)
 		api.GET("/directory/browse", fileHandler.BrowseDirectory)
-		
+
 		// 批量压缩图片
 		api.POST("/compress", compressHandler.CompressFiles)
-		
+
 		// 获取压缩统计
 		api.GET("/compress/stats", compressHandler.GetCompressionStats)
 	}
@@ -146,18 +136,19 @@ func main() {
 		log.Fatalf("无法创建压缩目录: %v", err)
 	}
 	r.Static("/compressed", compressedDir)
-	
+
 	// 检查是否为开发模式
-	isDevMode := true || strings.Contains(execPath, "go-build") || 
-	             strings.Contains(execPath, "/Temp/") ||
-	             strings.Contains(execPath, "\\Temp\\")
-	
+	execPath, _ := os.Executable()
+	isDevMode := strings.Contains(execPath, "go-build") ||
+		strings.Contains(execPath, "/Temp/") ||
+		strings.Contains(execPath, "\\Temp\\")
+
 	if isDevMode {
 		// 开发模式：使用本地前端目录
 		frontendDir := filepath.Join(baseDir, "frontend")
 		log.Printf("开发模式 - 使用本地前端目录: %s", frontendDir)
 		fmt.Printf("开发模式 - 使用本地前端目录: %s\n", frontendDir)
-		
+
 		// 提供前端静态文件
 		r.Static("/", frontendDir)
 		fmt.Println("✓ 本地前端资源加载成功")
@@ -166,7 +157,7 @@ func main() {
 		// 生产模式：使用嵌入的前端资源
 		fmt.Println("✓ 嵌入前端资源加载成功")
 		log.Println("✓ 嵌入前端资源加载成功")
-		
+
 		// 提供嵌入的前端index.html
 		r.GET("/", func(c *gin.Context) {
 			// 生产模式下会使用嵌入的资源

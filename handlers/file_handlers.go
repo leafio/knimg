@@ -39,21 +39,8 @@ func (h *FileHandler) ListFiles(c *gin.Context) {
 		return
 	}
 
-	// 支持自定义工作目录
-	workDir := c.Query("work_dir")
-	if workDir == "" {
-		workDir = h.BaseDir
-	}
-
-	// 验证目录存在
-	if _, err := os.Stat(workDir); os.IsNotExist(err) {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "目录不存在: " + workDir,
-		})
-		return
-	}
-
+	workDir := h.getWorkDir(c.Query("work_dir"))
+	
 	files, err := h.scanFilesWithFilter(workDir, &req)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{
@@ -73,6 +60,20 @@ func (h *FileHandler) ListFiles(c *gin.Context) {
 		"stats":     stats,
 		"work_dir":  workDir,
 	})
+}
+
+// getWorkDir 获取工作目录，如果未指定则使用默认目录
+func (h *FileHandler) getWorkDir(queryDir string) string {
+	workDir := queryDir
+	if workDir == "" {
+		workDir = h.BaseDir
+	}
+
+	// 验证目录存在
+	if _, err := os.Stat(workDir); os.IsNotExist(err) {
+		return h.BaseDir
+	}
+	return workDir
 }
 
 // scanFilesWithFilter 扫描目录中的文件（带筛选）
@@ -264,20 +265,7 @@ func (h *FileHandler) ExportFiles(c *gin.Context) {
 	var req models.FileListRequest
 	c.ShouldBindQuery(&req)
 
-	// 支持自定义工作目录
-	workDir := c.Query("work_dir")
-	if workDir == "" {
-		workDir = h.BaseDir
-	}
-
-	// 验证目录存在
-	if _, err := os.Stat(workDir); os.IsNotExist(err) {
-		c.JSON(http.StatusBadRequest, gin.H{
-			"success": false,
-			"message": "目录不存在: " + workDir,
-		})
-		return
-	}
+	workDir := h.getWorkDir(c.Query("work_dir"))
 
 	files, err := h.scanFilesWithFilter(workDir, &req)
 	if err != nil {
@@ -336,23 +324,12 @@ func (h *FileHandler) exportToExcel(files []models.FileInfo, exportDir string) (
 	for _, file := range files {
 		row := sheet.AddRow()
 		
-		cell1 := row.AddCell()
-		cell1.Value = file.Name
-		
-		cell2 := row.AddCell()
-		cell2.Value = file.Path
-		
-		cell3 := row.AddCell()
-		cell3.Value = fmt.Sprintf("%d", file.Size)
-		
-		cell4 := row.AddCell()
-		cell4.Value = file.Type
-		
-		cell5 := row.AddCell()
-		cell5.Value = file.Ext
-		
-		cell6 := row.AddCell()
-		cell6.Value = file.ModTime
+		row.AddCell().SetValue(file.Name)
+		row.AddCell().SetValue(file.Path)
+		row.AddCell().SetValue(file.Size)
+		row.AddCell().SetValue(file.Type)
+		row.AddCell().SetValue(file.Ext)
+		row.AddCell().SetValue(file.ModTime)
 	}
 
 	// 保存文件
@@ -474,10 +451,6 @@ func (h *FileHandler) BrowseDirectory(c *gin.Context) {
 	var directories []string
 	// 添加父目录
 	if dirPath != "/" {
-		parentDir := filepath.Dir(dirPath)
-		if parentDir == dirPath {
-			parentDir = "/"
-		}
 		directories = append(directories, "..")
 	}
 
