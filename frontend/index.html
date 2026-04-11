@@ -874,11 +874,31 @@
 
             <!-- 筛选区域 -->
             <div class="filter-section">
-                <div class="filter-row">
-                    <div class="filter-group">
+                <div class="filter-row" style="align-items: flex-end;">
+                    <div class="filter-group" style="flex: 1;">
                         <label>📂 工作目录:</label>
                         <input type="text" id="workDir" class="dir-input" placeholder="输入要分析的文件夹路径">
                         <button class="browse-btn" onclick="openDirectoryBrowser('workDir')">📁 浏览</button>
+                    </div>
+                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+                        <div class="quality-slider">
+                            <label>压缩质量:</label>
+                            <input type="range" id="quality" min="10" max="100" value="80">
+                            <span class="quality-value" id="qualityValue">80%</span>
+                        </div>
+                        <div class="filter-group">
+                            <input type="checkbox" id="overwrite" style="margin-right: 8px;">
+                            <label for="overwrite">覆盖原文件</label>
+                        </div>
+                        <button class="btn btn-success" id="compressBtn" onclick="compressFiles()">🗜️ 压缩选中</button>
+                        <!-- 压缩进度 -->
+                        <div id="compressProgress" style="display: none; margin-left: 15px; flex: 1;">
+                            <div style="font-size: 14px; margin-bottom: 5px; color: #667eea;">压缩进度</div>
+                            <div style="width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
+                                <div id="progressBar" style="height: 100%; background: #667eea; width: 0%; transition: width 0.3s ease;"></div>
+                            </div>
+                            <div id="progressText" style="font-size: 12px; color: #718096; margin-top: 5px;">0%</div>
+                        </div>
                     </div>
                 </div>
                 <div class="filter-row">
@@ -929,35 +949,11 @@
                 </div>
             </div>
 
-            <!-- 工具栏 -->
-            <div class="toolbar">
-                <div class="quality-slider">
-                    <label>压缩质量:</label>
-                    <input type="range" id="quality" min="10" max="100" value="80">
-                    <span class="quality-value" id="qualityValue">80%</span>
-                </div>
-
-                <div class="filter-group">
-                    <input type="checkbox" id="overwrite" style="margin-right: 8px;">
-                    <label for="overwrite">覆盖原文件</label>
-                </div>
-
-                <button class="btn btn-success" id="compressBtn" onclick="compressFiles()">🗜️ 压缩选中</button>
-
-                <!-- 压缩进度 -->
-                <div id="compressProgress" style="display: none; margin-left: 15px; flex: 1;">
-                    <div style="font-size: 14px; margin-bottom: 5px; color: #667eea;">压缩进度</div>
-                    <div style="width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
-                        <div id="progressBar" style="height: 100%; background: #667eea; width: 0%; transition: width 0.3s ease;"></div>
-                    </div>
-                    <div id="progressText" style="font-size: 12px; color: #718096; margin-top: 5px;">0%</div>
-                </div>
-
-                <div class="export-group">
-                    <button class="btn btn-secondary" id="exportExcelBtn" onclick="exportFiles('excel')">📊 Excel</button>
-                    <button class="btn btn-secondary" id="exportCsvBtn" onclick="exportFiles('csv')">📄 CSV</button>
-                    <button class="btn btn-secondary" id="exportJsonBtn" onclick="exportFiles('json')">📋 JSON</button>
-                </div>
+            <!-- 导出按钮组 -->
+            <div style="display: flex; gap: 8px; margin-bottom: 20px; justify-content: flex-end;">
+                <button class="btn btn-secondary" id="exportExcelBtn" onclick="exportFiles('excel')">📊 Excel</button>
+                <button class="btn btn-secondary" id="exportCsvBtn" onclick="exportFiles('csv')">📄 CSV</button>
+                <button class="btn btn-secondary" id="exportJsonBtn" onclick="exportFiles('json')">📋 JSON</button>
             </div>
 
             <!-- 文件列表 -->
