@@ -1222,12 +1222,20 @@
                 const response = await fetch('/api/files?' + params.toString());
                 const data = await response.json();
                 if (data.success) {
-                    state.filteredFiles = data.data;
+                    // 确保 filteredFiles 是数组
+                    state.filteredFiles = Array.isArray(data.data) ? data.data : [];
                     renderFileList(state.filteredFiles);
                     updateStats(data.stats);
+                } else {
+                    // 失败时显示空列表
+                    state.filteredFiles = [];
+                    renderFileList(state.filteredFiles);
                 }
             } catch (error) {
                 console.error('筛选失败:', error);
+                // 出错时显示空列表
+                state.filteredFiles = [];
+                renderFileList(state.filteredFiles);
             }
         }
 
@@ -1262,7 +1270,7 @@
                 'other': '<span class="file-type type-other">其他</span>'
             };
             
-            const extBadge = file.Ext ? `<span class="file-type" style="background:#e9d8fd;color:#44337a;margin-left:8px">${file.Ext}</span>` : '';
+            const extBadge = file.ext ? `<span class="file-type" style="background:#e9d8fd;color:#44337a;margin-left:8px">${file.ext}</span>` : '';
             
             return `
                 <div class="file-item">
