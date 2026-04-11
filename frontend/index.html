@@ -913,12 +913,14 @@
                     </div>
                     <div class="filter-group">
                         <label>📁 文件类型:</label>
-                        <select id="typeFilter" onchange="applyFilters()">
-                            <option value="all">全部</option>
-                            <option value="image">图片</option>
-                            <option value="document">文档</option>
-                            <option value="video">视频</option>
-                            <option value="other">其他</option>
+                        <select id="extFilter" onchange="selectExtension(this.value)">
+                            <option value="">选择扩展名</option>
+                            <option value="jpg,jpeg,png,gif,webp">图片 (jpg,jpeg,png,gif,webp)</option>
+                            <option value="doc,docx,xls,xlsx,ppt,pptx,pdf">文档 (doc,docx,xls,xlsx,ppt,pptx,pdf)</option>
+                            <option value="mp4,avi,mov,wmv,flv">视频 (mp4,avi,mov,wmv,flv)</option>
+                            <option value="js,ts,jsx,tsx,html,css,scss">前端 (js,ts,jsx,tsx,html,css,scss)</option>
+                            <option value="py,java,c,cpp,cs,php,go,rust">后端 (py,java,c,cpp,cs,php,go,rust)</option>
+                            <option value="zip,rar,7z,tar,gz">压缩包 (zip,rar,7z,tar,gz)</option>
                         </select>
                     </div>
                     <div class="filter-group">
@@ -1015,7 +1017,7 @@
             qualityValue: document.getElementById('qualityValue'),
             workDir: document.getElementById('workDir'),
             searchInput: document.getElementById('searchInput'),
-            typeFilter: document.getElementById('typeFilter'),
+            extFilter: document.getElementById('extFilter'),
             fileExt: document.getElementById('fileExt'),
             minSize: document.getElementById('minSize'),
             maxSize: document.getElementById('maxSize'),
@@ -1039,6 +1041,12 @@
             el.directoryModal.addEventListener('click', e => {
                 if (e.target === el.directoryModal) closeDirectoryBrowser();
             });
+        }
+
+        // 选择扩展名
+        function selectExtension(extensions) {
+            el.fileExt.value = extensions;
+            applyFilters();
         }
 
         // 显示/隐藏loading
@@ -1169,7 +1177,6 @@
             const params = new URLSearchParams();
             if (el.workDir.value) params.append('work_dir', el.workDir.value);
             if (el.searchInput.value) params.append('search', el.searchInput.value);
-            if (el.typeFilter.value && el.typeFilter.value !== 'all') params.append('file_type', el.typeFilter.value);
             if (el.fileExt.value) params.append('file_ext', el.fileExt.value);
             if (minSizeKB > 0) params.append('min_size', minSizeKB * 1024);
             if (maxSizeKB > 0) params.append('max_size', maxSizeKB * 1024);
@@ -1205,7 +1212,7 @@
             el.fileExt.value = '';
             el.minSize.value = '';
             el.maxSize.value = '';
-            el.typeFilter.value = 'all';
+            el.extFilter.value = '';
             el.sortBy.value = 'name';
             el.sortOrder.value = 'asc';
             applyFilters();
