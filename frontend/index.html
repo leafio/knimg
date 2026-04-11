@@ -849,6 +849,11 @@
                 <h1>🖼️ KnImg 文件管理</h1>
                 <p>智能文件管理与图片压缩工具 <span id="loadedInfo" style="margin-left: 15px; opacity: 0.9;"></span></p>
             </div>
+            <div style="display: flex; gap: 8px; align-items: center; margin-right: 20px;">
+                <button class="btn btn-secondary" id="exportExcelBtn" onclick="exportFiles('excel')">📊 Excel</button>
+                <button class="btn btn-secondary" id="exportCsvBtn" onclick="exportFiles('csv')">📄 CSV</button>
+                <button class="btn btn-secondary" id="exportJsonBtn" onclick="exportFiles('json')">📋 JSON</button>
+            </div>
             <div class="header-stats" id="headerStats" style="display: none;">
                 <div class="header-stat-card">
                     <div class="header-stat-value" id="headerStatImage">0</div>
@@ -949,12 +954,7 @@
                 </div>
             </div>
 
-            <!-- 导出按钮组 -->
-            <div style="display: flex; gap: 8px; margin-bottom: 20px; justify-content: flex-end;">
-                <button class="btn btn-secondary" id="exportExcelBtn" onclick="exportFiles('excel')">📊 Excel</button>
-                <button class="btn btn-secondary" id="exportCsvBtn" onclick="exportFiles('csv')">📄 CSV</button>
-                <button class="btn btn-secondary" id="exportJsonBtn" onclick="exportFiles('json')">📋 JSON</button>
-            </div>
+
 
             <!-- 文件列表 -->
             <div id="fileList">
