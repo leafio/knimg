@@ -45,7 +45,7 @@ func (s *CompressService) GetOutputDir(workDir, outputDir string, overwrite bool
 		return workDir
 	}
 
-	return filepath.Join(workDir, "compressed")
+	return workDir
 }
 
 // GetSmartQuality 根据文件大小获取智能压缩质量
@@ -226,7 +226,7 @@ func (s *CompressService) CompressFiles(files []string, quality int, workDir, ou
 // GetCompressionStats 获取压缩统计信息
 func (s *CompressService) GetCompressionStats(compressedDir string) (int, int64) {
 	if compressedDir == "" {
-		compressedDir = filepath.Join(s.BaseDir, "compressed")
+		return 0, 0
 	}
 
 	// 检查压缩目录是否存在

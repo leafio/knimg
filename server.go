@@ -101,14 +101,7 @@ func InitServer(isDevMode bool) (http.Handler, string) {
 	// 创建多路复用器
 	mux := http.NewServeMux()
 
-	// 创建压缩目录
-	compressedDir := filepath.Join(baseDir, "compressed")
-	log.Printf("压缩目录: %s", compressedDir)
-	if err := os.MkdirAll(compressedDir, 0755); err != nil {
-		log.Fatalf("无法创建压缩目录: %v", err)
-	}
-	compressedHandler := http.StripPrefix("/compressed", http.FileServer(http.Dir(compressedDir)))
-	mux.Handle("/compressed/", compressedHandler)
+
 
 	// 处理前端资源
 	if isDevMode {
