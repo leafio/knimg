@@ -36,6 +36,8 @@ if [ $? -eq 0 ]; then
     
     # 创建 macOS 应用程序包 (AMD64)
     echo "创建 macOS 应用程序包 (AMD64)..."
+    # 删除现有的应用程序包，确保创建全新的包
+    rm -rf build/KnImg-amd64.app
     mkdir -p build/KnImg-amd64.app/Contents/MacOS
     mkdir -p build/KnImg-amd64.app/Contents/Resources
     cp build/knimg-darwin-amd64 build/KnImg-amd64.app/Contents/MacOS/
@@ -77,6 +79,8 @@ if [ $? -eq 0 ]; then
     
     # 创建 macOS 应用程序包 (ARM64)
     echo "创建 macOS 应用程序包 (ARM64)..."
+    # 删除现有的应用程序包，确保创建全新的包
+    rm -rf build/KnImg-arm64.app
     mkdir -p build/KnImg-arm64.app/Contents/MacOS
     mkdir -p build/KnImg-arm64.app/Contents/Resources
     cp build/knimg-darwin-arm64 build/KnImg-arm64.app/Contents/MacOS/
