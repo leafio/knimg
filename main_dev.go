@@ -5,13 +5,13 @@ package main
 import (
 	"fmt"
 	"log"
+	"net/http"
 	"os"
 	"path/filepath"
 	"time"
 
 	"knimg/handlers"
 
-	"github.com/gin-gonic/gin"
 	webview "github.com/webview/webview_go"
 )
 
@@ -89,64 +89,55 @@ func main() {
 	fileHandler := handlers.NewFileHandler(baseDir)
 	compressHandler := handlers.NewCompressHandler(baseDir)
 
-	// 创建 Gin 路由器
-	r := gin.Default()
-
-	// 启用 CORS
-	r.Use(func(c *gin.Context) {
-		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type")
-		if c.Request.Method == "OPTIONS" {
-			c.AbortWithStatus(204)
-			return
+	// withCORS 添加 CORS 中间件
+	withCORS := func(next http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			w.Header().Set("Access-Control-Allow-Origin", "*")
+			w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
+			w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+			
+			if r.Method == "OPTIONS" {
+				w.WriteHeader(http.StatusNoContent)
+				return
+			}
+			
+			next(w, r)
 		}
-	})
-
-	// API 路由（先注册，更具体的路径）
-	api := r.Group("/api")
-	{
-		// 文件列表
-		api.GET("/files", fileHandler.ListFiles)
-		
-		// 导出文件列表
-		api.GET("/files/export", fileHandler.ExportFiles)
-		
-		// 目录浏览
-		api.GET("/directory/home", fileHandler.GetHomeDirectory)
-		api.GET("/directory/browse", fileHandler.BrowseDirectory)
-		
-		// 批量压缩图片
-		api.POST("/compress", compressHandler.CompressFiles)
-		
-		// 获取压缩统计
-		api.GET("/compress/stats", compressHandler.GetCompressionStats)
 	}
 
+	// 创建多路复用器
+	mux := http.NewServeMux()
+
 	// 静态文件服务
-	r.Static("/uploads", uploadDir)
+	uploadsHandler := http.StripPrefix("/uploads", http.FileServer(http.Dir(uploadDir)))
+	mux.Handle("/uploads/", uploadsHandler)
+
 	compressedDir := filepath.Join(baseDir, "compressed")
 	log.Printf("压缩目录: %s", compressedDir)
 	if err := os.MkdirAll(compressedDir, 0755); err != nil {
 		log.Fatalf("无法创建压缩目录: %v", err)
 	}
-	r.Static("/compressed", compressedDir)
+	compressedHandler := http.StripPrefix("/compressed", http.FileServer(http.Dir(compressedDir)))
+	mux.Handle("/compressed/", compressedHandler)
 
 	// 开发模式：使用本地前端目录
 	frontendDir := filepath.Join(baseDir, "frontend")
 	log.Printf("开发模式 - 使用本地前端目录: %s", frontendDir)
 	fmt.Printf("开发模式 - 使用本地前端目录: %s\n", frontendDir)
-	
-	// 提供前端静态文件（使用/frontend路径，避免与/api冲突）
-	r.Static("/frontend", frontendDir)
-	
-	// 重定向根路径到/frontend
-	r.GET("/", func(c *gin.Context) {
-		c.Redirect(302, "/frontend")
-	})
-	
+
+	// 提供前端静态文件
+	frontendHandler := http.FileServer(http.Dir(frontendDir))
+	mux.Handle("/", frontendHandler)
 	fmt.Println("✓ 本地前端资源加载成功")
 	log.Println("✓ 本地前端资源加载成功")
+
+	// API 路由
+	mux.HandleFunc("/api/files", withCORS(fileHandler.ListFiles))
+	mux.HandleFunc("/api/files/export", withCORS(fileHandler.ExportFiles))
+	mux.HandleFunc("/api/directory/home", withCORS(fileHandler.GetHomeDirectory))
+	mux.HandleFunc("/api/directory/browse", withCORS(fileHandler.BrowseDirectory))
+	mux.HandleFunc("/api/compress", withCORS(compressHandler.CompressFiles))
+	mux.HandleFunc("/api/compress/stats", withCORS(compressHandler.GetCompressionStats))
 
 	// 启动服务器
 	port := "8080"
@@ -164,11 +155,15 @@ func main() {
 	defer w.Destroy()
 	w.SetTitle("KnImg (开发模式)")
 	w.SetSize(1024, 768, webview.HintNone)
-	w.Navigate(fmt.Sprintf("http://localhost:%s/frontend", port))
+	w.Navigate(fmt.Sprintf("http://localhost:%s", port))
 
 	// 在goroutine中启动服务器
 	go func() {
-		if err := r.Run(":" + port); err != nil {
+		server := &http.Server{
+			Addr:    ":" + port,
+			Handler: mux,
+		}
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("服务器启动失败: %v", err)
 		}
 	}()
