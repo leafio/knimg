@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"net"
@@ -147,10 +148,26 @@ func InitServer(isDevMode bool) (http.Handler, string) {
 func StartServer(mux http.Handler, baseDir string) (string, webview.WebView) {
 	port := "8080"
 	serverAddr := ":" + port
+	var server *http.Server
 
 	// 尝试启动服务器，如果端口被占用，尝试其他端口
 	for i := 0; i < 10; i++ {
-		server := &http.Server{
+		// 先尝试绑定端口，检查是否被占用
+		listener, err := net.Listen("tcp", serverAddr)
+		if err != nil {
+			// 端口被占用，尝试下一个端口
+			log.Printf("端口 %s 被占用，尝试下一个端口", port)
+			fmt.Printf("端口 %s 被占用，尝试下一个端口\n", port)
+			port = fmt.Sprintf("%d", 8080+i+1)
+			serverAddr = ":" + port
+			continue
+		}
+		
+		// 端口可用，关闭监听器
+		listener.Close()
+		
+		// 创建新的服务器实例
+		server = &http.Server{
 			Addr:    serverAddr,
 			Handler: mux,
 		}
@@ -163,7 +180,7 @@ func StartServer(mux http.Handler, baseDir string) (string, webview.WebView) {
 		}()
 		
 		// 等待服务器启动
-		time.Sleep(500 * time.Millisecond)
+		time.Sleep(300 * time.Millisecond)
 		
 		// 检查服务器是否成功启动
 		conn, err := net.Dial("tcp", "localhost"+serverAddr)
@@ -177,9 +194,16 @@ func StartServer(mux http.Handler, baseDir string) (string, webview.WebView) {
 			break
 		}
 		
-		// 端口被占用，尝试下一个端口
-		log.Printf("端口 %s 被占用，尝试下一个端口", port)
-		fmt.Printf("端口 %s 被占用，尝试下一个端口\n", port)
+		// 服务器启动失败，尝试下一个端口
+		if server != nil {
+			// 创建一个上下文来关闭服务器
+			ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
+			defer cancel()
+			server.Shutdown(ctx)
+		}
+		
+		log.Printf("服务器启动失败，尝试下一个端口")
+		fmt.Printf("服务器启动失败，尝试下一个端口\n")
 		port = fmt.Sprintf("%d", 8080+i+1)
 		serverAddr = ":" + port
 	}
