@@ -20,6 +20,8 @@ jobs:
 
     env:
       FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+      GOPROXY: https://proxy.golang.org,direct
+      GOFLAGS: -buildvcs=false
 
     steps:
       - uses: actions/checkout@v4
@@ -30,11 +32,10 @@ jobs:
           go-version: '1.21'
           cache: false
 
-
-
       - name: Clean and update dependencies
         run: |
-          go clean -modcache
+          # 跳过 go clean -modcache 以避免 Windows 权限问题
+          # go clean -modcache
           go mod tidy
           go mod download
           go mod verify
