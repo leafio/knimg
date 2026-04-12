@@ -26,16 +26,16 @@ func NewFileService(baseDir string) *FileService {
 	}
 }
 
-// GetWorkDir 获取工作目录，如果未指定则使用默认目录
+// GetWorkDir 获取工作目录，如果未指定则返回空字符串
 func (s *FileService) GetWorkDir(queryDir string) string {
 	workDir := queryDir
 	if workDir == "" {
-		workDir = s.BaseDir
+		return ""
 	}
 
 	// 验证目录存在
 	if _, err := os.Stat(workDir); os.IsNotExist(err) {
-		return s.BaseDir
+		return ""
 	}
 	return workDir
 }
@@ -43,6 +43,10 @@ func (s *FileService) GetWorkDir(queryDir string) string {
 // ScanFilesWithFilter 扫描目录中的文件（带筛选）
 func (s *FileService) ScanFilesWithFilter(workDir string, req *models.FileListRequest) ([]models.FileInfo, error) {
 	var files []models.FileInfo
+
+	if workDir == "" {
+		return files, nil
+	}
 
 	err := filepath.Walk(workDir, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
