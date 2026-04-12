@@ -8,6 +8,7 @@ knimg.exe
 
 # 打包目录
 dist/
+build/
 
 # 上传和压缩目录
 uploads/
