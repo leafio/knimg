@@ -112,7 +112,7 @@ jobs:
           
           Write-Host "构建 Windows 窗口应用版本..."
           # 使用 -H=windowsgui 标志构建窗口应用，不显示控制台
-          go build -v -ldflags="-H=windowsgui -s -w" -trimpath -o knimg-windows-amd64.exe .
+          go build -v -ldflags="-H=windowsgui -s -w" -o knimg-windows-amd64.exe .
           
           # 检查构建结果
           Write-Host "\n=== 构建产物 ==="
