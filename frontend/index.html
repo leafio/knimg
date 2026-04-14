@@ -341,20 +341,22 @@
 
         .size-range-inputs {
             display: flex;
-            gap: 12px;
+            gap: 8px;
             align-items: center;
             background: var(--surface-light);
-            padding: 12px;
+            padding: 8px;
             border-radius: var(--radius-sm);
             border: 1px solid var(--border);
+            flex-wrap: wrap;
         }
 
         .size-range-inputs input {
             flex: 1;
-            padding: 8px 12px;
+            min-width: 60px;
+            padding: 6px 8px;
             border: 1px solid var(--border);
             border-radius: var(--radius-sm);
-            font-size: 13px;
+            font-size: 12px;
             background: var(--surface);
             color: var(--text);
             text-align: center;
@@ -416,6 +418,41 @@
 
         .btn-clear-filter:hover {
             background: var(--border-light);
+        }
+
+        /* 通用按钮样式 */
+        .btn-toggle {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: var(--surface-light);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-toggle:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .btn-toggle.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        /* 排序顺序按钮特殊样式 */
+        .sort-order-btn:hover {
+            border-color: var(--secondary);
+            color: var(--secondary);
+        }
+
+        .sort-order-btn.active {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
         }
 
         /* 主内容区 */
@@ -755,6 +792,55 @@
             box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
         }
 
+        /* 压缩参数面板 (折叠形式) */
+        .compress-panel-collapsible {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+        }
+
+        .compress-panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .compress-panel-header:hover {
+            background: var(--surface-light);
+        }
+
+        .compress-panel-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .compress-panel-toggle {
+            font-size: 12px;
+            color: var(--text-secondary);
+            transition: transform 0.2s ease;
+        }
+
+        .compress-panel-toggle.collapsed {
+            transform: rotate(-90deg);
+        }
+
+        .compress-panel-content {
+            padding: 0 24px 24px;
+            transition: all 0.3s ease;
+            max-height: 500px;
+            overflow: hidden;
+        }
+
+        .compress-panel-content.collapsed {
+            max-height: 0;
+            padding: 0 24px;
+        }
+
         /* 压缩进度 */
         #compressProgress {
             margin-top: 12px;
@@ -783,6 +869,9 @@
         }
 
         /* 消息提示 */
+        #message {
+            padding: 0 24px;
+        }
         .message {
             padding: 12px 16px;
             border-radius: var(--radius-md);
@@ -1073,7 +1162,11 @@
                 <span class="value" id="headerStatOther">0</span>
             </div>
         </div>
-        <div class="nav-right">
+        <div class="nav-right" style="display: flex; align-items: center; gap: 12px;">
+            <div style="display: flex; align-items: center; gap: 8px; background: var(--surface-light); padding: 4px 8px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                <input type="text" id="workDir" style="border: none; background: transparent; padding: 6px 8px; font-size: 13px; width: 200px;" placeholder="工作目录">
+                <button class="browse-btn" onclick="openDirectoryBrowser('workDir')" style="padding: 4px 8px;">📁</button>
+            </div>
             <button class="btn btn-secondary" onclick="exportFiles('excel')">📊 Excel</button>
             <button class="btn btn-secondary" onclick="exportFiles('csv')">📄 CSV</button>
             <button class="btn btn-secondary" onclick="exportFiles('json')">📋 JSON</button>
@@ -1086,17 +1179,11 @@
         <aside class="sidebar">
             <div class="sidebar-section">
                 <div class="sidebar-title">🔍 搜索文件</div>
+                <button class="btn-apply-filter" onclick="loadFiles()" style="margin-bottom: 12px;">🔍 搜索</button>
                 <input type="text" id="searchInput" class="filter-input" placeholder="输入文件名..." oninput="applyFilters()">
             </div>
 
-            <div class="sidebar-section">
-                <div class="sidebar-title">📂 工作目录</div>
-                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
-                    <input type="text" id="workDir" class="filter-input" style="flex: 1; margin-bottom: 0;" placeholder="文件夹路径">
-                    <button class="browse-btn" onclick="openDirectoryBrowser('workDir')">📁</button>
-                </div>
-                <button class="btn-apply-filter" onclick="loadFiles()">🔄 加载文件</button>
-            </div>
+
 
             <div class="sidebar-section">
                 <div class="sidebar-title">📊 文件类型</div>
@@ -1126,19 +1213,15 @@
 
             <div class="sidebar-section">
                 <div class="sidebar-title">📊 排序方式</div>
-                <div class="filter-group-sidebar">
-                    <select id="sortBy" onchange="applyFilters()">
-                        <option value="name">名称</option>
-                        <option value="size">大小</option>
-                        <option value="type">类型</option>
-                        <option value="time">修改时间</option>
-                    </select>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px;">
+                    <button class="btn-toggle active sort-btn" data-sort="name" onclick="setSortBy('name', this)">名称</button>
+                    <button class="btn-toggle sort-btn" data-sort="size" onclick="setSortBy('size', this)">大小</button>
+                    <button class="btn-toggle sort-btn" data-sort="type" onclick="setSortBy('type', this)">类型</button>
+                    <button class="btn-toggle sort-btn" data-sort="time" onclick="setSortBy('time', this)">时间</button>
                 </div>
-                <div class="filter-group-sidebar">
-                    <select id="sortOrder" onchange="applyFilters()">
-                        <option value="asc">升序</option>
-                        <option value="desc">降序</option>
-                    </select>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn-toggle active sort-order-btn" data-order="asc" onclick="setSortOrder('asc', this)">升序</button>
+                    <button class="btn-toggle sort-order-btn" data-order="desc" onclick="setSortOrder('desc', this)">降序</button>
                 </div>
             </div>
 
@@ -1161,12 +1244,54 @@
                     </div>
                 </div>
                 <div class="toolbar-right">
-                    <button class="btn btn-success" onclick="compressFiles()">🗜️ 压缩选中</button>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <button class="btn btn-success" onclick="compressFiles()" id="compressSelectedBtn">🗜️ 压缩选中 (0)</button>
+                        <div class="compress-panel-toggle" id="compressPanelToggle" onclick="toggleCompressPanel()" style="cursor: pointer; color: var(--text-secondary); font-size: 12px; transition: transform 0.2s ease;">▼</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 压缩参数设置 (折叠形式) -->
+            <div class="compress-panel-collapsible">
+                <div class="compress-panel-header">
+                    <div class="compress-panel-title">
+                    </div>
+                </div>
+                <div class="compress-panel-content" id="compressPanelContent">
+                    <div class="compress-options">
+                        <div class="compress-option-group">
+                            <span class="compress-option-label">输出目录:</span>
+                            <div style="display: flex; gap: 8px; align-items: center;">
+                                <input type="text" id="outputDir" class="filter-input" style="width: 300px; margin-bottom: 0;" placeholder="压缩后输出路径">
+                                <button class="browse-btn" onclick="openDirectoryBrowser('outputDir')">📁</button>
+                            </div>
+                        </div>
+                        
+                        <div class="compress-option-group">
+                            <span class="compress-option-label">输出格式:</span>
+                            <div class="format-options">
+                                <button class="format-btn active" onclick="setFormat('webp', this)">WebP</button>
+                                <button class="format-btn" onclick="setFormat('jpeg', this)">JPEG</button>
+                                <button class="format-btn" onclick="setFormat('png', this)">PNG</button>
+                                <button class="format-btn" onclick="setFormat('original', this)">原格式</button>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+                    <div id="compressProgress">
+                        <div>压缩进度</div>
+                        <div id="progressBar">
+                            <div id="progressBarInner"></div>
+                        </div>
+                        <div id="progressText" style="font-size: 12px; color: var(--text-secondary); margin-top: 5px;">0%</div>
+                    </div>
                 </div>
             </div>
 
             <!-- 文件区域 -->
-            <div class="file-area" id="message"></div>
+            <div id="message"></div>
             <div class="file-area" id="fileList">
                 <div class="empty-state">
                     <div class="empty-state-icon">📂</div>
@@ -1174,48 +1299,7 @@
                 </div>
             </div>
 
-            <!-- 压缩面板 -->
-            <div class="compress-panel">
-                <div class="compress-header">
-                    <div class="compress-title">
-                        <span>⚙️</span>
-                        <span>压缩参数设置</span>
-                        <span id="compressSubtitle" style="font-weight: normal; color: var(--text-secondary); font-size: 12px;">已选择 0 个图片文件</span>
-                    </div>
-                </div>
 
-                <div class="compress-options">
-                    <div class="compress-option-group">
-                        <span class="compress-option-label">输出目录:</span>
-                        <div style="display: flex; gap: 8px; align-items: center;">
-                            <input type="text" id="outputDir" class="filter-input" style="width: 300px; margin-bottom: 0;" placeholder="压缩后输出路径">
-                            <button class="browse-btn" onclick="openDirectoryBrowser('outputDir')">📁</button>
-                        </div>
-                    </div>
-                    
-                    <div class="compress-option-group">
-                        <span class="compress-option-label">输出格式:</span>
-                        <div class="format-options">
-                            <button class="format-btn active" onclick="setFormat('webp', this)">WebP</button>
-                            <button class="format-btn" onclick="setFormat('jpeg', this)">JPEG</button>
-                            <button class="format-btn" onclick="setFormat('png', this)">PNG</button>
-                            <button class="format-btn" onclick="setFormat('original', this)">原格式</button>
-                        </div>
-                    </div>
-                </div>
-
-                <button class="btn-compress" id="compressBtn" onclick="compressFiles()">
-                    ⚡ 开始压缩 0 个文件
-                </button>
-
-                <div id="compressProgress">
-                    <div>压缩进度</div>
-                    <div id="progressBar">
-                        <div id="progressBarInner"></div>
-                    </div>
-                    <div id="progressText" style="font-size: 12px; color: var(--text-secondary); margin-top: 5px;">0%</div>
-                </div>
-            </div>
         </div>
     </div>
 
@@ -1276,15 +1360,11 @@
             extDropdown: document.getElementById('extDropdown'),
             minSize: document.getElementById('minSize'),
             maxSize: document.getElementById('maxSize'),
-            sortBy: document.getElementById('sortBy'),
-            sortOrder: document.getElementById('sortOrder'),
             overwrite: document.getElementById('overwrite'),
             headerStatImage: document.getElementById('headerStatImage'),
             headerStatDoc: document.getElementById('headerStatDoc'),
             headerStatVideo: document.getElementById('headerStatVideo'),
-            headerStatOther: document.getElementById('headerStatOther'),
-            compressSubtitle: document.getElementById('compressSubtitle'),
-            compressBtn: document.getElementById('compressBtn')
+            headerStatOther: document.getElementById('headerStatOther')
         };
 
         // 初始化事件监听
@@ -1315,10 +1395,45 @@
             el.extDropdown.style.display = isHidden ? 'block' : 'none';
         }
 
+        // 防抖函数
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
         // 选择扩展名
         function selectExtension(extensions) {
             el.fileExt.value = extensions;
             el.extDropdown.style.display = 'none';
+            applyFilters();
+        }
+
+        // 切换压缩参数面板
+        function toggleCompressPanel() {
+            const content = document.getElementById('compressPanelContent');
+            const toggle = document.getElementById('compressPanelToggle');
+            content.classList.toggle('collapsed');
+            toggle.classList.toggle('collapsed');
+        }
+
+        // 设置排序方式
+        function setSortBy(sortBy, btn) {
+            document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            applyFilters();
+        }
+
+        // 设置排序顺序
+        function setSortOrder(sortOrder, btn) {
+            document.querySelectorAll('.sort-order-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
             applyFilters();
         }
 
@@ -1417,7 +1532,6 @@
         // 加载文件列表
         async function loadFiles() {
             try {
-                setButtonLoading('refreshBtn', true);
                 showLoading('正在加载文件列表...');
                 updateProgress(30);
                 
@@ -1443,7 +1557,6 @@
                 showMessage('加载失败：' + error.message, 'error');
             } finally {
                 setTimeout(() => {
-                    setButtonLoading('refreshBtn', false);
                     hideLoading();
                 }, 300);
             }
@@ -1454,22 +1567,27 @@
             const minSizeKB = parseFloat(el.minSize.value) || 0;
             const maxSizeKB = parseFloat(el.maxSize.value) || 0;
 
+            // 获取当前选中的排序方式
+            const sortBy = document.querySelector('.sort-btn.active').dataset.sort;
+            // 获取当前选中的排序顺序
+            const sortOrder = document.querySelector('.sort-order-btn.active').dataset.order;
+
             const params = new URLSearchParams();
             if (el.workDir.value) params.append('work_dir', el.workDir.value);
             if (el.searchInput.value) params.append('search', el.searchInput.value);
             if (el.fileExt.value) params.append('file_ext', el.fileExt.value);
             if (minSizeKB > 0) params.append('min_size', minSizeKB * 1024);
             if (maxSizeKB > 0) params.append('max_size', maxSizeKB * 1024);
-            params.append('sort_by', el.sortBy.value);
-            params.append('sort_order', el.sortOrder.value);
+            params.append('sort_by', sortBy);
+            params.append('sort_order', sortOrder);
             
             return params;
         }
 
         // 应用筛选
-        function applyFilters() {
+        const applyFilters = debounce(function() {
             fetchFilteredFiles(buildFilterParams());
-        }
+        }, 300);
 
         // 获取筛选后的文件
         async function fetchFilteredFiles(params) {
@@ -1498,8 +1616,15 @@
             el.minSize.value = '';
             el.maxSize.value = '';
             el.extDropdown.style.display = 'none';
-            el.sortBy.value = 'name';
-            el.sortOrder.value = 'asc';
+            
+            // 重置排序方式
+            document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.sort-btn[data-sort="name"]').classList.add('active');
+            
+            // 重置排序顺序
+            document.querySelectorAll('.sort-order-btn').forEach(b => b.classList.remove('active'));
+            document.querySelector('.sort-order-btn[data-order="asc"]').classList.add('active');
+            
             applyFilters();
         }
 
@@ -1542,14 +1667,12 @@
                         <div class="empty-state-icon">📂</div>
                         <p>暂无文件</p>
                     </div>`;
-                el.compressSubtitle.textContent = '已选择 0 个图片文件';
-                el.compressBtn.innerHTML = '⚡ 开始压缩 0 个文件';
+                document.getElementById('compressSelectedBtn').textContent = `🗜️ 压缩选中 (0)`;
                 return;
             }
 
             const selectedCount = fileList.filter(f => f.selected && f.type === 'image').length;
-            el.compressSubtitle.textContent = `已选择 ${selectedCount} 个图片文件`;
-            el.compressBtn.innerHTML = `⚡ 开始压缩 ${selectedCount} 个文件`;
+            document.getElementById('compressSelectedBtn').textContent = `🗜️ 压缩选中 (${selectedCount})`;
 
             el.fileList.innerHTML = `
                 <div class="file-list-view">
@@ -1576,8 +1699,7 @@
         // 更新压缩信息
         function updateCompressInfo() {
             const selectedCount = state.filteredFiles.filter(f => f.selected && f.type === 'image').length;
-            el.compressSubtitle.textContent = `已选择 ${selectedCount} 个图片文件`;
-            el.compressBtn.innerHTML = `⚡ 开始压缩 ${selectedCount} 个文件`;
+            document.getElementById('compressSelectedBtn').textContent = `🗜️ 压缩选中 (${selectedCount})`;
         }
 
         // 切换文件选择
@@ -1626,7 +1748,7 @@
             el.progressBarInner.style.width = '0%';
             el.progressText.textContent = '0%';
 
-            setButtonLoading('compressBtn', true);
+            setButtonLoading('compressSelectedBtn', true);
             showLoading(`正在压缩 ${selectedFiles.length} 个文件...`);
 
             try {
@@ -1653,7 +1775,7 @@
             } finally {
                 setTimeout(() => {
                     el.compressProgress.style.display = 'none';
-                    setButtonLoading('compressBtn', false);
+                    setButtonLoading('compressSelectedBtn', false);
                     hideLoading();
                 }, 2000);
             }
