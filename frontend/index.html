@@ -8,31 +8,39 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         :root {
-            --primary: #4f46e5;
-            --accent: #06b6d4;
-            --accent-dark: #0891b2;
-            --background: #f8fafc;
-            --surface: rgba(255, 255, 255, 0.8);
-            --surface-light: rgba(241, 245, 249, 0.8);
-            --text: #1e293b;
-            --text-secondary: #64748b;
-            --border: rgba(0, 0, 0, 0.1);
-            --glow-accent: rgba(6, 182, 212, 0.5);
-            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
-            --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.1);
-            --shadow-md: 0 8px 32px rgba(0, 0, 0, 0.1);
+            --primary: #FF6B6B;
+            --primary-dark: #EE5A5A;
+            --primary-light: #FF8E8E;
+            --secondary: #4ECDC4;
+            --secondary-dark: #3DBDB4;
+            --accent: #45B7D1;
+            --accent-purple: #A78BFA;
+            --background: #F7F9FC;
+            --surface: #FFFFFF;
+            --surface-light: #F8FAFB;
+            --text: #2D3748;
+            --text-secondary: #718096;
+            --text-light: #A0AEC0;
+            --border: #E2E8F0;
+            --border-light: #EDF2F7;
+            --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.06);
+            --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+            --gradient-primary: linear-gradient(135deg, #FF6B6B 0%, #A78BFA 100%);
+            --gradient-secondary: linear-gradient(135deg, #4ECDC4 0%, #45B7D1 100%);
+            --gradient-accent: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
             background: var(--background);
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(79, 70, 229, 0.1) 0%, transparent 20%),
-                radial-gradient(circle at 90% 80%, rgba(6, 182, 212, 0.1) 0%, transparent 20%);
             min-height: 100vh;
-            padding: 20px;
             color: var(--text);
+            overflow: hidden;
         }
 
         /* 顶部进度条 */
@@ -42,7 +50,7 @@
             left: 0;
             width: 100%;
             height: 3px;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(0, 0, 0, 0.05);
             z-index: 9999;
             opacity: 0;
             transition: opacity 0.3s ease;
@@ -52,7 +60,7 @@
 
         #topProgressBar .progress-bar-inner {
             height: 100%;
-            background: linear-gradient(90deg, var(--accent) 0%, var(--accent-dark) 100%);
+            background: var(--gradient-secondary);
             width: 0%;
             transition: width 0.3s ease;
         }
@@ -60,14 +68,14 @@
         /* Loading指示器 */
         .loading-indicator {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--surface-light);
+            top: 80px;
+            right: 24px;
+            background: var(--surface);
             backdrop-filter: blur(10px);
             padding: 12px 20px;
-            border-radius: 8px;
+            border-radius: var(--radius-md);
             border: 1px solid var(--border);
-            box-shadow: var(--shadow-sm);
+            box-shadow: var(--shadow-md);
             display: none;
             align-items: center;
             gap: 10px;
@@ -88,11 +96,6 @@
             100% { transform: rotate(360deg); }
         }
 
-        @keyframes shine {
-            0% { left: -100%; }
-            100% { left: 100%; }
-        }
-
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
@@ -103,53 +106,136 @@
             to { transform: translateY(0); opacity: 1; }
         }
 
-        /* 加载动画 */
         .loading-spinner {
             width: 16px;
             height: 16px;
-            border: 2px solid rgba(0, 0, 0, 0.1);
-            border-top: 2px solid var(--accent);
+            border: 2px solid var(--border);
+            border-top: 2px solid var(--primary);
             border-radius: 50%;
             animation: spin 1s linear infinite;
         }
 
-        /* 按钮样式 */
+        /* 顶部导航 */
+        .top-nav {
+            background: var(--surface);
+            padding: 16px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: var(--gradient-primary);
+            border-radius: var(--radius-sm);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+        }
+
+        .nav-title-group h1 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text);
+            margin-bottom: 2px;
+        }
+
+        .nav-title-group p {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .nav-stats {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .nav-stat-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: var(--surface-light);
+            border-radius: 20px;
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .nav-stat-badge .value {
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        .nav-right {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
         .btn {
-            padding: 10px 20px;
+            padding: 8px 16px;
             border: none;
-            border-radius: 8px;
+            border-radius: var(--radius-sm);
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             font-weight: 500;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .btn:hover::before {
-            width: 300px;
-            height: 300px;
+            gap: 6px;
         }
 
         .btn:hover {
-            transform: translateY(-2px);
+            transform: translateY(-1px);
             box-shadow: var(--shadow-sm);
+        }
+
+        .btn-primary {
+            background: var(--gradient-primary);
+            color: white;
+        }
+
+        .btn-success {
+            background: var(--gradient-secondary);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: var(--surface-light);
+            color: var(--text);
+            border: 1px solid var(--border);
+        }
+
+        .browse-btn {
+            padding: 8px 12px;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.2s ease;
+        }
+
+        .browse-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
         }
 
         .btn.loading {
@@ -170,259 +256,193 @@
             margin-left: 8px;
         }
 
-        /* 按钮变体 */
-        .btn-primary {
-            background: var(--gradient-primary);
-            color: white;
+        /* 主布局 - 左右结构 */
+        .main-layout {
+            display: flex;
+            height: calc(100vh - 73px);
+            overflow: hidden;
         }
 
-        .btn-primary:hover { box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4); }
-
-        .btn-success {
-            background: var(--gradient-success);
-            color: white;
+        /* 左侧筛选面板 */
+        .sidebar {
+            width: 280px;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 20px;
+            overflow-y: auto;
+            flex-shrink: 0;
         }
 
-        .btn-success:hover { box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4); }
+        .sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
 
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.9);
+        .sidebar::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+            border-radius: 3px;
+        }
+
+        .sidebar::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+        }
+
+        .sidebar-section {
+            margin-bottom: 24px;
+        }
+
+        .sidebar-title {
+            font-size: 14px;
+            font-weight: 600;
             color: var(--text);
-            border: 1px solid var(--border);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
-        .browse-btn {
-            padding: 8px 12px;
+        .filter-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            background: var(--surface-light);
+            color: var(--text);
+            margin-bottom: 12px;
+        }
+
+        .filter-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1);
+        }
+
+        .filter-group-sidebar {
+            margin-bottom: 12px;
+        }
+
+        .filter-group-sidebar label {
+            display: block;
+            font-size: 13px;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .filter-group-sidebar select {
+            width: 100%;
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            background: var(--surface-light);
+            color: var(--text);
+        }
+
+        .size-range-inputs {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .size-range-inputs input {
+            flex: 1;
+            padding: 8px 10px;
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            font-size: 13px;
+            background: var(--surface-light);
+            color: var(--text);
+        }
+
+        .btn-apply-filter {
+            width: 100%;
+            padding: 10px;
             background: var(--gradient-primary);
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: var(--radius-md);
             cursor: pointer;
             font-size: 14px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .browse-btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-        }
-
-        /* 容器 */
-        .container {
-            margin: 0 auto;
-            background: var(--surface);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
-            border: 1px solid var(--border);
-            box-shadow: var(--shadow-md);
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .container:hover { box-shadow: 0 12px 40px rgba(79, 70, 229, 0.15); }
-
-        /* 头部 */
-        .header {
-            background: var(--gradient-primary);
-            color: white;
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            flex-wrap: wrap;
-            gap: 20px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-            animation: shine 3s infinite;
-        }
-
-        .header-content {
-            flex: 1;
-            min-width: 300px;
-            position: relative;
-            z-index: 1;
-        }
-
-        .header h1 {
-            font-size: 1.8em;
-            margin-bottom: 5px;
-            font-weight: 600;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        .header p {
-            opacity: 0.9;
-            font-size: 0.9em;
-            text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
-        }
-
-        /* 头部统计 */
-        .header-stats {
-            display: flex;
-            gap: 12px;
-            align-items: center;
-            position: relative;
-            z-index: 1;
-        }
-
-        .header-stat-card {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            color: white;
-            padding: 8px 14px;
-            border-radius: 8px;
-            text-align: center;
-            min-width: 85px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s ease;
-        }
-
-        .header-stat-card:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-        }
-
-        .header-stat-value {
-            font-size: 1.3em;
-            font-weight: bold;
-            margin-bottom: 2px;
-        }
-
-        .header-stat-label {
-            font-size: 0.7em;
-            opacity: 0.9;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .content { padding: 30px; }
-
-        /* 筛选区域 */
-        .filter-section {
-            background: var(--surface-light);
-            padding: 20px;
-            border-radius: 12px;
-            margin-bottom: 20px;
-            border: 1px solid var(--border);
-            transition: all 0.3s ease;
-        }
-
-        .filter-section:hover {
-            box-shadow: 0 4px 20px rgba(79, 70, 229, 0.1);
-            border-color: rgba(79, 70, 229, 0.3);
-        }
-
-        .filter-row {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .filter-row:last-child { margin-bottom: 0; }
-
-        .filter-group {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .filter-group label {
             font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-apply-filter:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
+        }
+
+        .btn-clear-filter {
+            width: 100%;
+            padding: 10px;
+            background: var(--surface-light);
             color: var(--text-secondary);
-            white-space: nowrap;
-        }
-
-        .filter-group input,
-        .filter-group select {
-            padding: 8px 12px;
             border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 14px;
-            background: rgba(255, 255, 255, 0.9);
-            color: var(--text);
-            transition: all 0.3s ease;
-        }
-
-        .filter-group input:focus,
-        .filter-group select:focus {
-            outline: none;
-            border-color: var(--accent);
-            box-shadow: 0 0 0 3px var(--glow-accent);
-        }
-
-        /* 输入框大小 */
-        .search-input { min-width: 200px; }
-        .size-input { width: 100px; }
-        .dir-input { min-width: 280px; }
-
-        /* 扩展名下拉列表样式 */
-        .filter-group { position: relative; }
-        .ext-dropdown-item {
-            padding: 8px 12px;
+            border-radius: var(--radius-md);
             cursor: pointer;
-            transition: background 0.2s;
+            font-size: 14px;
+            font-weight: 500;
+            margin-top: 8px;
+            transition: all 0.2s ease;
         }
-        .ext-dropdown-item:hover {
-            background: rgba(99, 102, 241, 0.1);
+
+        .btn-clear-filter:hover {
+            background: var(--border-light);
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
         }
 
         /* 工具栏 */
         .toolbar {
+            background: var(--surface);
+            padding: 16px 24px;
+            border-bottom: 1px solid var(--border);
             display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
             align-items: center;
-            padding: 15px;
-            background: var(--surface-light);
-            border-radius: 12px;
-            border: 1px solid var(--border);
-            transition: all 0.3s ease;
+            justify-content: space-between;
+            gap: 16px;
         }
 
-        .toolbar:hover {
-            box-shadow: 0 4px 20px rgba(79, 70, 229, 0.1);
-            border-color: rgba(79, 70, 229, 0.3);
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
 
-        /* 质量滑块 */
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
         .quality-slider {
             display: flex;
             align-items: center;
             gap: 10px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 10px 15px;
-            border-radius: 8px;
+            background: var(--surface-light);
+            padding: 8px 12px;
+            border-radius: var(--radius-sm);
             border: 1px solid var(--border);
         }
 
         .quality-slider label {
-            font-weight: 500;
+            font-size: 13px;
             color: var(--text-secondary);
             white-space: nowrap;
         }
 
         .quality-slider input[type="range"] {
-            width: 120px;
+            width: 100px;
             height: 6px;
             border-radius: 3px;
-            background: rgba(0, 0, 0, 0.1);
+            background: var(--border);
             outline: none;
         }
 
@@ -432,107 +452,114 @@
             border-radius: 50%;
             background: var(--gradient-primary);
             cursor: pointer;
-            box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
         }
 
         .quality-value {
             min-width: 40px;
             text-align: center;
-            font-weight: bold;
-            color: #6366f1;
-        }
-
-        /* 文件列表 */
-        .file-list {
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            overflow: hidden;
-            max-height: 500px;
-            overflow-y: auto;
-            background: var(--surface-light);
-        }
-
-        /* 滚动条样式 */
-        .file-list::-webkit-scrollbar,
-        .modal-body::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .file-list::-webkit-scrollbar-track,
-        .modal-body::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.05);
-            border-radius: 3px;
-        }
-
-        .file-list::-webkit-scrollbar-thumb,
-        .modal-body::-webkit-scrollbar-thumb {
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 3px;
-        }
-
-        .file-list::-webkit-scrollbar-thumb:hover,
-        .modal-body::-webkit-scrollbar-thumb:hover {
-            background: rgba(0, 0, 0, 0.3);
-        }
-
-        .file-list-header {
-            display: flex;
-            align-items: center;
-            padding: 12px 20px;
-            background: rgba(241, 245, 249, 0.8);
-            border-bottom: 1px solid var(--border);
             font-weight: 600;
-            color: var(--text);
+            color: var(--primary);
+            font-size: 13px;
         }
 
-        .file-item {
+        /* 文件内容区 */
+        .file-area {
+            flex: 1;
+            overflow: auto;
+            padding: 24px;
+        }
+
+        .file-area::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .file-area::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.05);
+        }
+
+        .file-area::-webkit-scrollbar-thumb {
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        /* 文件网格视图 */
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .file-card {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            transition: all 0.2s ease;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .file-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--primary);
+        }
+
+        .file-card.selected {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(255, 107, 107, 0.2);
+        }
+
+        .file-card-image {
+            width: 100%;
+            height: 150px;
+            background: var(--surface-light);
             display: flex;
             align-items: center;
-            padding: 12px 20px;
-            border-bottom: 1px solid var(--border);
-            transition: all 0.3s ease;
+            justify-content: center;
+            font-size: 48px;
             position: relative;
-            background: rgba(255, 255, 255, 0.9);
         }
 
-        .file-item:last-child { border-bottom: none; }
-
-        .file-item:hover {
-            background: rgba(255, 255, 255, 1);
-            transform: translateX(5px);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .file-item::before {
-            content: '';
+        .file-card-checkbox {
             position: absolute;
-            left: 0;
-            top: 0;
-            width: 3px;
-            height: 100%;
-            background: transparent;
-            transition: all 0.3s ease;
+            top: 8px;
+            left: 8px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            opacity: 0;
         }
 
-        .file-item:hover::before {
-            background: #6366f1;
-            box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+        .file-card:hover .file-card-checkbox,
+        .file-card.selected .file-card-checkbox {
+            opacity: 1;
         }
 
-        .file-checkbox {
-            margin-right: 15px;
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-            accent-color: #6366f1;
+        .file-card.selected .file-card-checkbox {
+            background: var(--primary);
+            border-color: var(--primary);
         }
 
-        .file-info {
-            flex: 1;
-            min-width: 0;
+        .file-card.selected .file-card-checkbox::after {
+            content: '✓';
+            color: white;
+            font-size: 12px;
+            font-weight: bold;
         }
 
-        .file-name {
+        .file-card-info {
+            padding: 12px;
+        }
+
+        .file-card-name {
+            font-size: 13px;
             font-weight: 500;
             color: var(--text);
             margin-bottom: 4px;
@@ -541,80 +568,217 @@
             text-overflow: ellipsis;
         }
 
-        .file-meta {
-            font-size: 0.85em;
+        .file-card-meta {
+            font-size: 11px;
             color: var(--text-secondary);
+            display: flex;
+            gap: 8px;
+        }
+
+        .file-card-ext {
+            display: inline-block;
+            padding: 2px 6px;
+            background: var(--surface-light);
+            border-radius: 4px;
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
+
+        /* 文件列表视图 */
+        .file-list-view {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border);
+            overflow: hidden;
+        }
+
+        .file-list-header {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            background: var(--surface-light);
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+        }
+
+        .file-list-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-light);
+            transition: all 0.2s ease;
+        }
+
+        .file-list-item:hover {
+            background: var(--surface-light);
+        }
+
+        .file-list-item.selected {
+            background: rgba(255, 107, 107, 0.05);
+        }
+
+        .file-list-checkbox {
+            width: 18px;
+            height: 18px;
+            margin-right: 12px;
+            accent-color: var(--primary);
+        }
+
+        .file-list-name {
+            flex: 1;
+            font-size: 13px;
+            color: var(--text);
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
         }
 
-        /* 文件类型标签 */
-        .file-type {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 12px;
-            font-size: 0.75em;
-            font-weight: 500;
-            margin-left: 10px;
-            white-space: nowrap;
-        }
-
-        .type-image { background: rgba(6, 182, 212, 0.2); color: #06b6d4; }
-        .type-document { background: rgba(16, 185, 129, 0.2); color: #10b981; }
-        .type-video { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
-        .type-other { background: rgba(100, 116, 139, 0.2); color: #64748b; }
-
-        .file-size {
-            min-width: 100px;
+        .file-list-size {
+            width: 100px;
             text-align: right;
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        /* 加载状态 */
-        .loading {
-            text-align: center;
-            padding: 40px;
+            font-size: 13px;
             color: var(--text-secondary);
         }
 
-        .spinner {
-            border: 3px solid rgba(0, 0, 0, 0.1);
-            border-top: 3px solid #6366f1;
-            border-radius: 50%;
-            width: 40px;
-            height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-            box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
+        /* 压缩面板 */
+        .compress-panel {
+            background: var(--surface);
+            border-top: 1px solid var(--border);
+            padding: 16px 24px;
+        }
+
+        .compress-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .compress-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .compress-options {
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .compress-option-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .compress-option-label {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .format-options {
+            display: flex;
+            gap: 8px;
+        }
+
+        .format-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            background: var(--surface-light);
+            color: var(--text-secondary);
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s ease;
+        }
+
+        .format-btn:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+
+        .format-btn.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .btn-compress {
+            width: 100%;
+            padding: 12px;
+            background: var(--gradient-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .btn-compress:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+        }
+
+        /* 压缩进度 */
+        #compressProgress {
+            margin-top: 12px;
+            display: none;
+        }
+
+        #compressProgress div { 
+            color: var(--text-secondary); 
+            font-size: 13px;
+        }
+
+        #progressBar {
+            width: 100%;
+            height: 6px;
+            background: var(--border);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        #progressBarInner {
+            height: 100%;
+            background: var(--gradient-primary);
+            width: 0%;
+            transition: width 0.3s ease;
         }
 
         /* 消息提示 */
         .message {
-            padding: 15px 20px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border: 1px solid var(--border);
-            background: rgba(255, 255, 255, 0.9);
+            padding: 12px 16px;
+            border-radius: var(--radius-md);
+            margin-bottom: 16px;
+            font-size: 13px;
         }
 
         .message-success {
-            background: rgba(16, 185, 129, 0.1);
-            color: #10b981;
-            border-left: 4px solid #10b981;
+            background: rgba(78, 205, 196, 0.1);
+            color: var(--secondary-dark);
+            border-left: 3px solid var(--secondary);
         }
 
         .message-error {
-            background: rgba(239, 68, 68, 0.1);
-            color: #ef4444;
-            border-left: 4px solid #ef4444;
+            background: rgba(255, 107, 107, 0.1);
+            color: var(--primary-dark);
+            border-left: 3px solid var(--primary);
         }
 
         .message-info {
-            background: rgba(6, 182, 212, 0.1);
-            color: #06b6d4;
-            border-left: 4px solid #06b6d4;
+            background: rgba(69, 183, 209, 0.1);
+            color: var(--accent);
+            border-left: 3px solid var(--accent);
         }
 
         /* 空状态 */
@@ -625,23 +789,12 @@
         }
 
         .empty-state-icon {
-            font-size: 4em;
-            margin-bottom: 20px;
-            opacity: 0.5;
+            font-size: 64px;
+            margin-bottom: 16px;
+            opacity: 0.3;
         }
 
-        /* 导出按钮组 */
-        .export-group {
-            display: flex;
-            gap: 8px;
-        }
-
-        .export-group .btn {
-            padding: 8px 16px;
-            font-size: 13px;
-        }
-
-        /* 文件夹选择模态框 */
+        /* 模态框 */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -649,30 +802,33 @@
             right: 0;
             bottom: 0;
             background: rgba(0, 0, 0, 0.5);
-            backdrop-filter: blur(10px);
-            display: flex;
+            backdrop-filter: blur(8px);
+            display: none;
             align-items: center;
             justify-content: center;
             z-index: 1000;
-            animation: fadeIn 0.3s ease;
+            animation: fadeIn 0.2s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
         }
 
         .modal {
-            background: var(--surface-light);
-            backdrop-filter: blur(20px);
-            border-radius: 16px;
+            background: var(--surface);
+            border-radius: var(--radius-xl);
             width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
+            max-width: 650px;
+            max-height: 85vh;
             display: flex;
             flex-direction: column;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            box-shadow: var(--shadow-lg);
             border: 1px solid var(--border);
             animation: slideUp 0.3s ease;
         }
 
         .modal-header {
-            padding: 20px;
+            padding: 20px 24px;
             border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
@@ -680,40 +836,45 @@
         }
 
         .modal-title {
-            font-size: 1.2em;
+            font-size: 18px;
             font-weight: 600;
             color: var(--text);
         }
 
         .modal-close {
-            background: none;
+            width: 32px;
+            height: 32px;
             border: none;
-            font-size: 1.5em;
-            cursor: pointer;
+            border-radius: var(--radius-sm);
+            background: var(--surface-light);
             color: var(--text-secondary);
-            padding: 5px;
-            line-height: 1;
-            transition: all 0.3s ease;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            transition: all 0.2s ease;
         }
 
         .modal-close:hover {
+            background: var(--border);
             color: var(--text);
             transform: rotate(90deg);
         }
 
         .modal-body {
-            padding: 20px;
+            padding: 20px 24px;
             overflow-y: auto;
             flex: 1;
         }
 
         .current-path {
-            background: rgba(255, 255, 255, 0.9);
+            background: var(--surface-light);
             padding: 10px 15px;
-            border-radius: 6px;
+            border-radius: var(--radius-sm);
             margin-bottom: 15px;
             font-family: monospace;
-            font-size: 0.9em;
+            font-size: 13px;
             color: var(--text-secondary);
             word-break: break-all;
             border: 1px solid var(--border);
@@ -721,10 +882,10 @@
 
         .directory-list {
             border: 1px solid var(--border);
-            border-radius: 6px;
+            border-radius: var(--radius-sm);
             max-height: 300px;
             overflow-y: auto;
-            background: rgba(255, 255, 255, 0.9);
+            background: var(--surface-light);
         }
 
         .directory-item {
@@ -733,22 +894,24 @@
             align-items: center;
             gap: 10px;
             cursor: pointer;
-            transition: all 0.3s ease;
-            border-bottom: 1px solid var(--border);
+            transition: all 0.2s ease;
+            border-bottom: 1px solid var(--border-light);
         }
 
         .directory-item:last-child { border-bottom: none; }
 
         .directory-item:hover {
-            background: rgba(241, 245, 249, 1);
+            background: var(--surface);
             transform: translateX(5px);
         }
 
-        .directory-item.parent { background: rgba(99, 102, 241, 0.1); }
+        .directory-item.parent { 
+            background: rgba(255, 107, 107, 0.05); 
+        }
 
         .directory-icon {
             font-size: 1.2em;
-            color: #6366f1;
+            color: var(--primary);
         }
 
         .directory-name {
@@ -768,24 +931,20 @@
         .btn-cancel,
         .btn-select {
             padding: 10px 20px;
-            border-radius: 8px;
+            border-radius: var(--radius-md);
             cursor: pointer;
             font-weight: 500;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
+            transition: all 0.2s ease;
         }
 
         .btn-cancel {
-            background: rgba(255, 255, 255, 0.9);
+            background: var(--surface-light);
             color: var(--text);
             border: 1px solid var(--border);
         }
 
         .btn-cancel:hover {
-            background: rgba(255, 255, 255, 1);
-            transform: translateY(-1px);
-            box-shadow: var(--shadow-sm);
+            background: var(--border);
         }
 
         .btn-select {
@@ -796,51 +955,53 @@
 
         .btn-select:hover {
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.4);
         }
 
-        /* 压缩进度 */
-        #compressProgress {
-            flex: 1;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 10px 15px;
-            border-radius: 8px;
+        /* 扩展名下拉 */
+        .ext-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: var(--surface);
             border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            box-shadow: var(--shadow-md);
+            z-index: 100;
+            max-height: 200px;
+            overflow-y: auto;
+            display: none;
+            margin-top: 4px;
         }
 
-        #compressProgress div { color: var(--text-secondary); }
+        .ext-dropdown-item {
+            padding: 8px 12px;
+            cursor: pointer;
+            transition: background 0.2s;
+            font-size: 12px;
+        }
 
-        #progressBar {
-            background: var(--gradient-primary) !important;
+        .ext-dropdown-item:hover {
+            background: rgba(255, 107, 107, 0.1);
         }
 
         /* 响应式 */
         @media (max-width: 768px) {
-            .header {
+            .main-layout {
                 flex-direction: column;
-                align-items: flex-start;
             }
-            
-            .header-stats {
+
+            .sidebar {
                 width: 100%;
-                justify-content: space-around;
+                max-height: 300px;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
             }
 
-            .filter-row {
-                flex-direction: column;
-                align-items: stretch;
+            .file-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
             }
-
-            .filter-group { width: 100%; }
-            .filter-group input,
-            .filter-group select { flex: 1; }
-
-            .toolbar {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .quality-slider { justify-content: center; }
         }
     </style>
 </head>
@@ -851,138 +1012,187 @@
     <!-- Loading指示器 -->
     <div id="loadingIndicator" class="loading-indicator">
         <div class="loading-spinner"></div>
-        <span class="loading-text" id="loadingText">加载中...</span>
+        <span id="loadingText">加载中...</span>
     </div>
 
-    <div class="container">
-        <div class="header">
-            <div class="header-content">
-                <h1>🖼️ KnImg 文件管理</h1>
-                <p>智能文件管理与图片压缩工具 <span id="loadedInfo" style="margin-left: 15px; opacity: 0.9;"></span></p>
-            </div>
-            <div style="display: flex; gap: 8px; align-items: center; margin-right: 20px;">
-                <button class="btn btn-secondary" id="exportExcelBtn" onclick="exportFiles('excel')">📊 Excel</button>
-                <button class="btn btn-secondary" id="exportCsvBtn" onclick="exportFiles('csv')">📄 CSV</button>
-                <button class="btn btn-secondary" id="exportJsonBtn" onclick="exportFiles('json')">📋 JSON</button>
-            </div>
-            <div class="header-stats" id="headerStats" style="display: none;">
-                <div class="header-stat-card">
-                    <div class="header-stat-value" id="headerStatImage">0</div>
-                    <div class="header-stat-label">图片</div>
-                </div>
-                <div class="header-stat-card">
-                    <div class="header-stat-value" id="headerStatDoc">0</div>
-                    <div class="header-stat-label">文档</div>
-                </div>
-                <div class="header-stat-card">
-                    <div class="header-stat-value" id="headerStatVideo">0</div>
-                    <div class="header-stat-label">视频</div>
-                </div>
-                <div class="header-stat-card">
-                    <div class="header-stat-value" id="headerStatOther">0</div>
-                    <div class="header-stat-label">其他</div>
-                </div>
+    <!-- 顶部导航 -->
+    <nav class="top-nav">
+        <div class="nav-left">
+            <div class="logo">K</div>
+            <div class="nav-title-group">
+                <h1>KnImg 文件管理</h1>
+                <p>智能文件管理与图片压缩工具 <span id="loadedInfo"></span></p>
             </div>
         </div>
+        <div class="nav-stats" id="headerStats" style="display: none;">
+            <div class="nav-stat-badge">
+                <span>🖼️</span>
+                <span>图片:</span>
+                <span class="value" id="headerStatImage">0</span>
+            </div>
+            <div class="nav-stat-badge">
+                <span>📄</span>
+                <span>文档:</span>
+                <span class="value" id="headerStatDoc">0</span>
+            </div>
+            <div class="nav-stat-badge">
+                <span>🎥</span>
+                <span>视频:</span>
+                <span class="value" id="headerStatVideo">0</span>
+            </div>
+            <div class="nav-stat-badge">
+                <span>📦</span>
+                <span>其他:</span>
+                <span class="value" id="headerStatOther">0</span>
+            </div>
+        </div>
+        <div class="nav-right">
+            <button class="btn btn-secondary" onclick="exportFiles('excel')">📊 Excel</button>
+            <button class="btn btn-secondary" onclick="exportFiles('csv')">📄 CSV</button>
+            <button class="btn btn-secondary" onclick="exportFiles('json')">📋 JSON</button>
+        </div>
+    </nav>
 
-        <div class="content">
-            <div id="message"></div>
+    <!-- 主布局 -->
+    <div class="main-layout">
+        <!-- 左侧筛选面板 -->
+        <aside class="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">🔍 搜索文件</div>
+                <input type="text" id="searchInput" class="filter-input" placeholder="输入文件名..." oninput="applyFilters()">
+            </div>
 
-            <!-- 筛选区域 -->
-            <div class="filter-section">
-                <div class="filter-row" style="align-items: flex-end;">
-                    <div class="filter-group" style="flex: 1;">
-                        <label>📂 工作目录:</label>
-                        <input type="text" id="workDir" class="dir-input" placeholder="输入要分析的文件夹路径">
-                        <button class="browse-btn" onclick="openDirectoryBrowser('workDir')">📁 浏览</button>
-                    </div>
-                    <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
-                        <div class="filter-group">
-                            <label>📁 输出目录:</label>
-                            <input type="text" id="outputDir" class="dir-input" placeholder="选择输出目录">
-                            <button class="browse-btn" onclick="openDirectoryBrowser('outputDir')">📁 浏览</button>
-                        </div>
-                        <div class="quality-slider">
-                            <label>压缩质量:</label>
-                            <input type="range" id="quality" min="10" max="100" value="80">
-                            <span class="quality-value" id="qualityValue">80%</span>
-                        </div>
-                        <div class="filter-group">
-                            <input type="checkbox" id="overwrite" style="margin-right: 8px;">
-                            <label for="overwrite">覆盖原文件</label>
-                        </div>
-                        <button class="btn btn-success" id="compressBtn" onclick="compressFiles()">🗜️ 压缩选中</button>
-                        <!-- 压缩进度 -->
-                        <div id="compressProgress" style="display: none; margin-left: 15px; flex: 1;">
-                            <div style="font-size: 14px; margin-bottom: 5px; color: #667eea;">压缩进度</div>
-                            <div style="width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; overflow: hidden;">
-                                <div id="progressBar" style="height: 100%; background: #667eea; width: 0%; transition: width 0.3s ease;"></div>
-                            </div>
-                            <div id="progressText" style="font-size: 12px; color: #718096; margin-top: 5px;">0%</div>
-                        </div>
-                    </div>
+            <div class="sidebar-section">
+                <div class="sidebar-title">📂 工作目录</div>
+                <div style="display: flex; gap: 8px; margin-bottom: 12px;">
+                    <input type="text" id="workDir" class="filter-input" style="flex: 1; margin-bottom: 0;" placeholder="文件夹路径">
+                    <button class="browse-btn" onclick="openDirectoryBrowser('workDir')">📁</button>
                 </div>
-                <div class="filter-row">
-                    <div class="filter-group">
-                        <label>🔍 名称搜索:</label>
-                        <input type="text" id="searchInput" class="search-input" placeholder="输入文件名..." oninput="applyFilters()">
-                    </div>
-                    <div class="filter-group" style="position: relative;">
-                        <label>📁 扩展名:</label>
-                        <input type="text" id="fileExt" class="search-input" placeholder="js,ts,py" oninput="applyFilters()">
-                        <button class="browse-btn" id="extDropdownBtn" onclick="toggleExtDropdown()">▼</button>
-                        <div id="extDropdown" class="ext-dropdown" style="display: none; position: absolute; top: 100%; left: 0; right: 0; background: white; border: 1px solid var(--border); border-radius: 6px; box-shadow: var(--shadow-sm); z-index: 100; max-height: 300px; overflow-y: auto;">
-                            <div class="ext-dropdown-item" onclick="selectExtension('jpg,jpeg,png,gif,webp')">图片 (jpg,jpeg,png,gif,webp)</div>
-                            <div class="ext-dropdown-item" onclick="selectExtension('doc,docx,xls,xlsx,ppt,pptx,pdf')">文档 (doc,docx,xls,xlsx,ppt,pptx,pdf)</div>
-                            <div class="ext-dropdown-item" onclick="selectExtension('mp4,avi,mov,wmv,flv')">视频 (mp4,avi,mov,wmv,flv)</div>
-                            <div class="ext-dropdown-item" onclick="selectExtension('js,ts,jsx,tsx,html,css,scss')">前端 (js,ts,jsx,tsx,html,css,scss)</div>
-                            <div class="ext-dropdown-item" onclick="selectExtension('py,java,c,cpp,cs,php,go,rust')">后端 (py,java,c,cpp,cs,php,go,rust)</div>
-                            <div class="ext-dropdown-item" onclick="selectExtension('zip,rar,7z,tar,gz')">压缩包 (zip,rar,7z,tar,gz)</div>
-                        </div>
-                    </div>
-                    <div class="filter-group">
-                        <label>📊 排序:</label>
-                        <select id="sortBy" onchange="applyFilters()">
-                            <option value="name">名称</option>
-                            <option value="size">大小</option>
-                            <option value="type">类型</option>
-                            <option value="time">修改时间</option>
-                        </select>
-                    </div>
-                    <div class="filter-group">
-                        <select id="sortOrder" onchange="applyFilters()">
-                            <option value="asc">升序</option>
-                            <option value="desc">降序</option>
-                        </select>
-                    </div>
-                </div>
-                <div class="filter-row">
-                    <div class="filter-group">
-                        <label>📏 大小范围:</label>
-                        <input type="number" id="minSize" class="size-input" placeholder="最小 KB" onchange="applyFilters()">
-                        <span>-</span>
-                        <input type="number" id="maxSize" class="size-input" placeholder="最大 KB" onchange="applyFilters()">
-                        <span>KB</span>
-                    </div>
-                    <button class="btn btn-secondary" onclick="clearFilters()">🔄 清除筛选</button>
-                    <button class="btn btn-primary" id="refreshBtn" onclick="loadFiles()">🔄 刷新列表</button>
+                <button class="btn-apply-filter" onclick="loadFiles()">🔄 加载文件</button>
+            </div>
+
+            <div class="sidebar-section">
+                <div class="sidebar-title">📁 输出目录</div>
+                <div style="display: flex; gap: 8px;">
+                    <input type="text" id="outputDir" class="filter-input" style="flex: 1; margin-bottom: 0;" placeholder="输出路径">
+                    <button class="browse-btn" onclick="openDirectoryBrowser('outputDir')">📁</button>
                 </div>
             </div>
 
+            <div class="sidebar-section">
+                <div class="sidebar-title">📊 文件类型</div>
+                <div class="filter-group-sidebar" style="position: relative;">
+                    <input type="text" id="fileExt" class="filter-input" placeholder="jpg,ts,py" oninput="applyFilters()">
+                    <button class="browse-btn" id="extDropdownBtn" onclick="toggleExtDropdown()" style="position: absolute; right: 8px; top: 8px; padding: 4px 8px;">▼</button>
+                    <div id="extDropdown" class="ext-dropdown">
+                        <div class="ext-dropdown-item" onclick="selectExtension('jpg,jpeg,png,gif,webp')">图片 (jpg,jpeg,png,gif,webp)</div>
+                        <div class="ext-dropdown-item" onclick="selectExtension('doc,docx,xls,xlsx,ppt,pptx,pdf')">文档 (doc,docx,xls,xlsx,ppt,pptx,pdf)</div>
+                        <div class="ext-dropdown-item" onclick="selectExtension('mp4,avi,mov,wmv,flv')">视频 (mp4,avi,mov,wmv,flv)</div>
+                        <div class="ext-dropdown-item" onclick="selectExtension('js,ts,jsx,tsx,html,css,scss')">前端 (js,ts,jsx,tsx,html,css,scss)</div>
+                        <div class="ext-dropdown-item" onclick="selectExtension('py,java,c,cpp,cs,php,go,rust')">后端 (py,java,c,cpp,cs,php,go,rust)</div>
+                        <div class="ext-dropdown-item" onclick="selectExtension('zip,rar,7z,tar,gz')">压缩包 (zip,rar,7z,tar,gz)</div>
+                    </div>
+                </div>
+            </div>
 
+            <div class="sidebar-section">
+                <div class="sidebar-title">📏 文件大小</div>
+                <div class="size-range-inputs">
+                    <input type="number" id="minSize" placeholder="最小 KB" onchange="applyFilters()">
+                    <span>-</span>
+                    <input type="number" id="maxSize" placeholder="最大 KB" onchange="applyFilters()">
+                </div>
+            </div>
 
-            <!-- 文件列表 -->
-            <div id="fileList">
+            <div class="sidebar-section">
+                <div class="sidebar-title">📊 排序方式</div>
+                <div class="filter-group-sidebar">
+                    <select id="sortBy" onchange="applyFilters()">
+                        <option value="name">名称</option>
+                        <option value="size">大小</option>
+                        <option value="type">类型</option>
+                        <option value="time">修改时间</option>
+                    </select>
+                </div>
+                <div class="filter-group-sidebar">
+                    <select id="sortOrder" onchange="applyFilters()">
+                        <option value="asc">升序</option>
+                        <option value="desc">降序</option>
+                    </select>
+                </div>
+            </div>
+
+            <button class="btn-clear-filter" onclick="clearFilters()">🔄 清除筛选</button>
+        </aside>
+
+        <!-- 主内容区 -->
+        <div class="main-content">
+            <!-- 工具栏 -->
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <div class="quality-slider">
+                        <label>压缩质量:</label>
+                        <input type="range" id="quality" min="10" max="100" value="80">
+                        <span class="quality-value" id="qualityValue">80%</span>
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 8px;">
+                        <input type="checkbox" id="overwrite" style="width: 16px; height: 16px;">
+                        <label for="overwrite" style="font-size: 13px; color: var(--text-secondary);">覆盖原文件</label>
+                    </div>
+                </div>
+                <div class="toolbar-right">
+                    <button class="btn btn-success" onclick="compressFiles()">🗜️ 压缩选中</button>
+                </div>
+            </div>
+
+            <!-- 文件区域 -->
+            <div class="file-area" id="message"></div>
+            <div class="file-area" id="fileList">
                 <div class="empty-state">
                     <div class="empty-state-icon">📂</div>
-                    <p>暂无文件</p>
+                    <p>暂无文件，请选择目录开始</p>
+                </div>
+            </div>
+
+            <!-- 压缩面板 -->
+            <div class="compress-panel">
+                <div class="compress-header">
+                    <div class="compress-title">
+                        <span>⚙️</span>
+                        <span>压缩参数设置</span>
+                        <span id="compressSubtitle" style="font-weight: normal; color: var(--text-secondary); font-size: 12px;">已选择 0 个图片文件</span>
+                    </div>
+                </div>
+
+                <div class="compress-options">
+                    <div class="compress-option-group">
+                        <span class="compress-option-label">输出格式:</span>
+                        <div class="format-options">
+                            <button class="format-btn active" onclick="setFormat('webp', this)">WebP</button>
+                            <button class="format-btn" onclick="setFormat('jpeg', this)">JPEG</button>
+                            <button class="format-btn" onclick="setFormat('png', this)">PNG</button>
+                            <button class="format-btn" onclick="setFormat('original', this)">原格式</button>
+                        </div>
+                    </div>
+                </div>
+
+                <button class="btn-compress" id="compressBtn" onclick="compressFiles()">
+                    ⚡ 开始压缩 0 个文件
+                </button>
+
+                <div id="compressProgress">
+                    <div>压缩进度</div>
+                    <div id="progressBar">
+                        <div id="progressBarInner"></div>
+                    </div>
+                    <div id="progressText" style="font-size: 12px; color: var(--text-secondary); margin-top: 5px;">0%</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 文件夹选择模态框 -->
-    <div id="directoryModal" class="modal-overlay" style="display: none;">
+    <!-- 目录选择模态框 -->
+    <div id="directoryModal" class="modal-overlay">
         <div class="modal">
             <div class="modal-header">
                 <h3 class="modal-title" id="modalTitle">选择文件夹</h3>
@@ -1006,7 +1216,9 @@
             filteredFiles: [],
             currentBrowsePath: '',
             activeDirectoryInput: null,
-            currentExportFormat: null
+            currentExportFormat: null,
+            currentFormat: 'webp',
+            currentScale: 100
         };
 
         // DOM 元素缓存
@@ -1024,7 +1236,7 @@
             currentPath: document.getElementById('currentPath'),
             directoryList: document.getElementById('directoryList'),
             compressProgress: document.getElementById('compressProgress'),
-            progressBarInner: document.getElementById('progressBar'),
+            progressBarInner: document.getElementById('progressBarInner'),
             progressText: document.getElementById('progressText'),
             quality: document.getElementById('quality'),
             qualityValue: document.getElementById('qualityValue'),
@@ -1042,7 +1254,9 @@
             headerStatImage: document.getElementById('headerStatImage'),
             headerStatDoc: document.getElementById('headerStatDoc'),
             headerStatVideo: document.getElementById('headerStatVideo'),
-            headerStatOther: document.getElementById('headerStatOther')
+            headerStatOther: document.getElementById('headerStatOther'),
+            compressSubtitle: document.getElementById('compressSubtitle'),
+            compressBtn: document.getElementById('compressBtn')
         };
 
         // 初始化事件监听
@@ -1080,6 +1294,13 @@
             applyFilters();
         }
 
+        // 设置输出格式
+        function setFormat(format, btn) {
+            state.currentFormat = format;
+            document.querySelectorAll('.format-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+        }
+
         // 显示/隐藏loading
         function showLoading(text = '加载中...') {
             el.loadingText.textContent = text;
@@ -1108,12 +1329,12 @@
             state.activeDirectoryInput = inputId;
             el.modalTitle.textContent = inputId === 'workDir' ? '选择工作目录' : '选择导出目录';
             await browseDirectory(el[inputId]?.value || '');
-            el.directoryModal.style.display = 'flex';
+            el.directoryModal.classList.add('active');
         }
 
         // 关闭文件夹浏览器
         function closeDirectoryBrowser() {
-            el.directoryModal.style.display = 'none';
+            el.directoryModal.classList.remove('active');
             state.activeDirectoryInput = null;
         }
 
@@ -1228,18 +1449,15 @@
                 const response = await fetch('/api/files?' + params.toString());
                 const data = await response.json();
                 if (data.success) {
-                    // 确保 filteredFiles 是数组
                     state.filteredFiles = Array.isArray(data.data) ? data.data : [];
                     renderFileList(state.filteredFiles);
                     updateStats(data.stats);
                 } else {
-                    // 失败时显示空列表
                     state.filteredFiles = [];
                     renderFileList(state.filteredFiles);
                 }
             } catch (error) {
                 console.error('筛选失败:', error);
-                // 出错时显示空列表
                 state.filteredFiles = [];
                 renderFileList(state.filteredFiles);
             }
@@ -1267,7 +1485,7 @@
             el.headerStatOther.textContent = stats.other_count || 0;
         }
 
-        // 创建文件项HTML
+        // 创建文件项HTML（列表视图）
         function createFileItemHTML(file, index) {
             const typeLabels = {
                 'image': '<span class="file-type type-image">图片</span>',
@@ -1276,17 +1494,15 @@
                 'other': '<span class="file-type type-other">其他</span>'
             };
             
-            const extBadge = file.ext ? `<span class="file-type" style="background:#e9d8fd;color:#44337a;margin-left:8px">${file.ext}</span>` : '';
+            const extBadge = file.ext ? `<span class="file-card-ext">${file.ext}</span>` : '';
             
             return `
-                <div class="file-item">
-                    <input type="checkbox" class="file-checkbox" data-index="${index}"
-                           ${file.type === 'image' ? '' : 'disabled'} ${file.selected ? 'checked' : ''}>
-                    <div class="file-info">
-                        <div class="file-name">${file.name}${typeLabels[file.type] || typeLabels['other']}${extBadge}</div>
-                        <div class="file-meta">${file.path} | 修改时间: ${file.mod_time}</div>
-                    </div>
-                    <div class="file-size">${formatSize(file.size)}</div>
+                <div class="file-list-item ${file.selected ? 'selected' : ''}" onclick="toggleFileSelect(${index}, event)">
+                    <input type="checkbox" class="file-list-checkbox" data-index="${index}"
+                           ${file.type === 'image' ? '' : 'disabled'} ${file.selected ? 'checked' : ''} 
+                           onclick="event.stopPropagation()">
+                    <div class="file-list-name">${file.name}${typeLabels[file.type] || typeLabels['other']}</div>
+                    <div class="file-list-size">${formatSize(file.size)}</div>
                 </div>`;
         }
 
@@ -1298,38 +1514,69 @@
                         <div class="empty-state-icon">📂</div>
                         <p>暂无文件</p>
                     </div>`;
+                el.compressSubtitle.textContent = '已选择 0 个图片文件';
+                el.compressBtn.innerHTML = '⚡ 开始压缩 0 个文件';
                 return;
             }
 
+            const selectedCount = fileList.filter(f => f.selected && f.type === 'image').length;
+            el.compressSubtitle.textContent = `已选择 ${selectedCount} 个图片文件`;
+            el.compressBtn.innerHTML = `⚡ 开始压缩 ${selectedCount} 个文件`;
+
             el.fileList.innerHTML = `
-                <div class="file-list">
+                <div class="file-list-view">
                     <div class="file-list-header">
-                        <input type="checkbox" class="file-checkbox" onchange="toggleSelectAll(this)">
-                        <div class="file-info">文件名</div>
-                        <div class="file-size">大小</div>
+                        <input type="checkbox" class="file-list-checkbox" onchange="toggleSelectAll(this)" style="margin-right: 12px;">
+                        <div style="flex: 1;">文件名</div>
+                        <div style="width: 100px; text-align: right;">大小</div>
                     </div>
                     ${fileList.map((file, index) => createFileItemHTML(file, index)).join('')}
                 </div>`;
 
             // 添加复选框事件监听
-            document.querySelectorAll('.file-checkbox:not([disabled])').forEach(cb => {
+            document.querySelectorAll('.file-list-checkbox:not([disabled])').forEach(cb => {
                 cb.addEventListener('change', function() {
                     const index = parseInt(this.dataset.index);
                     if (state.filteredFiles[index]) {
                         state.filteredFiles[index].selected = this.checked;
+                        updateCompressInfo();
                     }
                 });
             });
         }
 
+        // 更新压缩信息
+        function updateCompressInfo() {
+            const selectedCount = state.filteredFiles.filter(f => f.selected && f.type === 'image').length;
+            el.compressSubtitle.textContent = `已选择 ${selectedCount} 个图片文件`;
+            el.compressBtn.innerHTML = `⚡ 开始压缩 ${selectedCount} 个文件`;
+        }
+
+        // 切换文件选择
+        function toggleFileSelect(index, event) {
+            if (event.target.type === 'checkbox') return;
+            const file = state.filteredFiles[index];
+            if (file && file.type === 'image') {
+                file.selected = !file.selected;
+                const checkbox = document.querySelector(`.file-list-checkbox[data-index="${index}"]`);
+                if (checkbox) checkbox.checked = file.selected;
+                const item = checkbox?.closest('.file-list-item');
+                if (item) item.classList.toggle('selected', file.selected);
+                updateCompressInfo();
+            }
+        }
+
         // 全选/取消全选
         function toggleSelectAll(checkbox) {
-            document.querySelectorAll('.file-checkbox:not([disabled])').forEach((cb, index) => {
+            document.querySelectorAll('.file-list-checkbox:not([disabled])').forEach((cb, index) => {
                 cb.checked = checkbox.checked;
                 if (state.filteredFiles[index]) {
                     state.filteredFiles[index].selected = checkbox.checked;
+                    const item = cb.closest('.file-list-item');
+                    if (item) item.classList.toggle('selected', checkbox.checked);
                 }
             });
+            updateCompressInfo();
         }
 
         // 压缩文件
@@ -1433,7 +1680,7 @@
             state.activeDirectoryInput = 'export';
             el.modalTitle.textContent = '选择导出目录';
             browseDirectory('').then(() => {
-                el.directoryModal.style.display = 'flex';
+                el.directoryModal.classList.add('active');
             });
         }
 
