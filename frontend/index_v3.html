@@ -30,7 +30,7 @@
             background: var(--background);
             color: var(--text);
             line-height: 1.5;
-            overflow-y: auto;
+            overflow: hidden; /* Prevent body scroll */
         }
 
         /* 顶部导航栏 */
@@ -236,6 +236,7 @@
         .main-layout {
             display: flex;
             height: calc(100vh - 65px);
+            overflow: hidden; /* Prevent layout scroll */
         }
 
         /* 左侧筛选面板 */
@@ -244,11 +245,8 @@
             background: var(--surface);
             border-right: 1px solid var(--border);
             padding: 20px;
-            overflow-y: auto;
+            overflow-y: auto; /* Independent scroll for filter panel */
             flex-shrink: 0;
-            position: sticky;
-            top: 0;
-            height: calc(100vh - 65px);
         }
 
         .filter-section {
