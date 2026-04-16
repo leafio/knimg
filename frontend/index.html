@@ -664,44 +664,132 @@
             backdrop-filter: saturate(180%) blur(20px);
             -webkit-backdrop-filter: saturate(180%) blur(20px);
             border-bottom: 1px solid var(--border);
-            padding: 14px 24px;
+            padding: 8px 24px;
             flex-shrink: 0;
         }
 
-        .compress-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 14px;
-        }
-
-        .compress-title {
-            font-weight: 600;
-            font-size: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            letter-spacing: -0.2px;
-        }
-
+        /* 压缩内容布局 */
         .compress-content {
             display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
             align-items: center;
+        }
+
+        .compress-row {
+            display: flex;
+            gap: 16px;
+            align-items: center;
+            width: 100%;
         }
 
         .compress-field {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 6px;
+            white-space: nowrap;
         }
 
         .compress-field label {
-            font-size: 13px;
+            font-size: 12px;
             color: var(--text-secondary);
             white-space: nowrap;
             font-weight: 500;
+        }
+
+        /* Tooltip 样式 */
+        .tooltip-wrapper {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            cursor: help;
+        }
+
+        .tooltip-icon {
+            font-size: 14px;
+            opacity: 0.5;
+            transition: opacity 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+        }
+
+        .tooltip-wrapper:hover .tooltip-icon {
+            opacity: 1;
+        }
+
+        .tooltip-text {
+            visibility: hidden;
+            opacity: 0;
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%) translateY(4px);
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 100;
+            pointer-events: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .tooltip-text::after {
+            content: '';
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 5px solid transparent;
+            border-bottom-color: rgba(0, 0, 0, 0.85);
+        }
+
+        .tooltip-wrapper:hover .tooltip-text {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(8px);
+        }
+
+        /* 输出目录输入框包装器 */
+        .output-dir-input-wrapper {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .output-dir-input-wrapper .filter-input {
+            padding-right: 32px !important;
+        }
+
+        .output-dir-btn {
+            position: absolute;
+            right: 4px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            padding: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+            border-radius: 4px;
+        }
+
+        .output-dir-btn:hover {
+            opacity: 1;
+            background: var(--primary-light);
+        }
+
+        /* 分隔符 */
+        .compress-divider {
+            width: 1px;
+            height: 20px;
+            background: var(--border);
+            margin: 0 4px;
         }
 
         /* 质量滑块 - Apple 风格 */
@@ -963,6 +1051,12 @@
             align-items: center;
             justify-content: center;
             z-index: 1000;
+            animation: fadeIn 0.2s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .modal-overlay.show { display: flex; }
@@ -979,6 +1073,18 @@
             flex-direction: column;
             box-shadow: var(--shadow-lg);
             border: 1px solid var(--border);
+            animation: modalSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
         }
 
         .modal-header {
@@ -993,6 +1099,13 @@
             font-size: 17px;
             font-weight: 600;
             letter-spacing: -0.3px;
+        }
+
+        .modal-header h3 {
+            font-size: 17px;
+            font-weight: 600;
+            letter-spacing: -0.3px;
+            margin: 0;
         }
 
         .modal-close {
@@ -1012,6 +1125,7 @@
 
         .modal-close:hover {
             background: var(--background);
+            color: var(--text);
         }
 
         .modal-body {
@@ -1088,11 +1202,126 @@
             display: flex;
             gap: 10px;
             justify-content: flex-end;
+            background: var(--background);
+            border-radius: 0 0 16px 16px;
         }
 
         .modal-footer .btn {
             min-width: 80px;
             justify-content: center;
+        }
+
+        /* 压缩选项弹窗样式已移除 */
+        /* 压缩选项弹窗专用样式 */
+        #compressModal .modal-body > p {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 20px !important;
+        }
+
+        #compressModal .modal-body label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            background: var(--background);
+            border: 1px solid transparent;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            margin-bottom: 12px;
+        }
+
+        #compressModal .modal-body label:hover {
+            background: var(--primary-light);
+            border-color: var(--primary);
+        }
+
+        #compressModal .modal-body label input[type="radio"] {
+            width: 18px;
+            height: 18px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        #compressModal .modal-body label div {
+            flex: 1;
+        }
+
+        #compressModal .modal-body label div div:first-child {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+            color: var(--text);
+            letter-spacing: -0.2px;
+        }
+
+        #compressModal .modal-body label div div:last-child {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        #outputDirSelector {
+            margin-top: 16px;
+            padding: 16px;
+            background: var(--background);
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            animation: slideDown 0.2s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #outputDirSelector label {
+            font-size: 13px;
+            font-weight: 600;
+            display: block;
+            margin-bottom: 10px;
+            color: var(--text);
+            letter-spacing: -0.2px;
+        }
+
+        #outputDirSelector .output-dir-input-wrapper {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        #outputDirSelector #modalOutputDir {
+            flex: 1;
+            padding: 10px 12px;
+            font-size: 13px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            background: var(--surface);
+            color: var(--text);
+            transition: all 0.2s;
+        }
+
+        #outputDirSelector #modalOutputDir:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 4px var(--primary-light);
+        }
+
+        #outputDirSelector #modalOutputDir::placeholder {
+            color: var(--text-secondary);
+        }
+
+        #outputDirSelector .btn {
+            padding: 10px 14px;
+            font-size: 14px;
+            white-space: nowrap;
         }
 
         /* 响应式 */
@@ -1224,44 +1453,47 @@
         <main class="content-area">
             <!-- 压缩面板 -->
             <div class="compress-panel" id="compressPanel">
-                <div class="compress-header">
-                    <div class="compress-title">
-                        <span>🗜️</span>
-                        <span>图片压缩</span>
-                        <span id="compressSelectedText" style="color: var(--text-secondary); font-size: 13px; font-weight: normal;">(已选中 0 个图片)</span>
-                    </div>
-                </div>
-                <div class="compress-content show">
-                    <div class="compress-field">
-                        <label>输出目录:</label>
-                        <input type="text" class="filter-input" id="outputDir" placeholder="留空则覆盖原文件" style="width: 200px;">
-                        <button class="btn" onclick="openDirectoryBrowser('outputDir')">📁</button>
-                    </div>
-                    
-                    <div class="compress-field">
-                        <label>压缩质量:</label>
-                        <div class="quality-slider">
-                            <input type="range" id="quality" min="10" max="100" value="80">
-                            <span class="quality-value" id="qualityValue">80%</span>
+                <div class="compress-content">
+                    <div class="compress-row">
+                        <div class="compress-field">
+                            <div class="tooltip-wrapper">
+                                <span class="tooltip-icon">ℹ️</span>
+                                <span class="tooltip-text">选择输出图片格式</span>
+                            </div>
+                            <select class="filter-input" id="compressFormatSelect" style="width: 90px; padding: 4px 8px; font-size: 12px;">
+                                <option value="webp">WebP</option>
+                                <option value="jpeg">JPEG</option>
+                                <option value="png">PNG</option>
+                                <option value="">原格式</option>
+                            </select>
                         </div>
-                    </div>
 
-                    <div class="compress-field">
-                        <label>输出格式:</label>
-                        <div class="format-buttons">
-                            <button class="format-btn active" onclick="setFormat('webp')">WebP</button>
-                            <button class="format-btn" onclick="setFormat('jpeg')">JPEG</button>
-                            <button class="format-btn" onclick="setFormat('png')">PNG</button>
-                            <button class="format-btn" onclick="setFormat('')">原格式</button>
+                        <div class="compress-field">
+                            <div class="tooltip-wrapper">
+                                <span class="tooltip-icon">ℹ️</span>
+                                <span class="tooltip-text">留空则覆盖原文件</span>
+                            </div>
+                            <div class="output-dir-input-wrapper">
+                                <input type="text" class="filter-input" id="outputDir" placeholder="选择目录" style="width: 160px; padding: 4px 32px 4px 8px; font-size: 12px;">
+                                <button class="output-dir-btn" onclick="openDirectoryBrowser('outputDir')">📁</button>
+                            </div>
                         </div>
-                    </div>
+                        
+                        <div class="compress-field">
+                            <div class="tooltip-wrapper">
+                                <span class="tooltip-icon">ℹ️</span>
+                                <span class="tooltip-text">压缩质量 10-100</span>
+                            </div>
+                            <div class="quality-slider">
+                                <input type="range" id="quality" min="10" max="100" value="80" style="width: 80px;">
+                                <span class="quality-value" id="qualityValue" style="font-size: 12px; min-width: 32px;">80%</span>
+                            </div>
+                        </div>
 
-                    <div class="compress-field">
-                        <input type="checkbox" id="overwrite" style="margin-right: 6px;">
-                        <label for="overwrite">覆盖原文件</label>
-                    </div>
+                        <div class="compress-divider"></div>
 
-                    <button class="btn btn-success" id="compressBtn" onclick="compressFiles()" disabled>🗜️ 开始压缩</button>
+                        <button class="btn btn-success" id="compressBtn" onclick="compressFiles()" disabled style="padding: 4px 12px; font-size: 12px; margin-left: auto;">🗜️ 压缩图片 (0)</button>
+                    </div>
                 </div>
             </div>
 
@@ -1310,6 +1542,56 @@
             <div class="modal-footer">
                 <button class="btn" onclick="closeDirectoryBrowser()">取消</button>
                 <button class="btn btn-primary" onclick="selectDirectory()">选择此目录</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 压缩选项弹窗已移除 -->
+    <!-- 压缩选项弹窗 -->
+    <div class="modal-overlay" id="compressModal" style="display: none;">
+        <div class="modal" style="max-width: 420px;">
+            <div class="modal-header">
+                <h3 style="margin: 0;">压缩选项</h3>
+                <button class="modal-close" onclick="closeCompressModal()">×</button>
+            </div>
+            <div class="modal-body" style="padding: 24px;">
+                <p style="margin: 0 0 20px 0; color: var(--text-secondary); font-size: 13px;">选择压缩后的文件保存方式：</p>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--background); border-radius: 8px; cursor: pointer; transition: all 0.2s;" 
+                           onmouseover="this.style.background='var(--primary-light)'" 
+                           onmouseout="this.style.background='var(--background)'">
+                        <input type="radio" name="compressOption" value="overwrite" checked style="width: 18px; height: 18px;">
+                        <div>
+                            <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">覆盖原文件</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">直接替换原始图片文件</div>
+                        </div>
+                    </label>
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--background); border-radius: 8px; cursor: pointer; transition: all 0.2s;" 
+                           onmouseover="this.style.background='var(--primary-light)'" 
+                           onmouseout="this.style.background='var(--background)'">
+                        <input type="radio" name="compressOption" value="newdir" style="width: 18px; height: 18px;">
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; font-size: 14px; margin-bottom: 4px;">保存到新目录</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">选择新的输出文件夹</div>
+                        </div>
+                    </label>
+                </div>
+
+                <div id="outputDirSelector" style="display: none; margin-top: 16px; padding: 16px; background: var(--background); border-radius: 8px;">
+                    <label style="font-size: 13px; font-weight: 600; display: block; margin-bottom: 8px;">选择输出目录：</label>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input type="text" class="filter-input" id="modalOutputDir" placeholder="点击右侧按钮选择目录" style="flex: 1; padding: 8px; font-size: 13px;" readonly>
+                        <button class="btn" onclick="openDirectoryBrowser('modalOutputDir')">📁</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeCompressModal()">取消</button>
+                <button class="btn btn-success" onclick="confirmCompress()" style="min-width: 100px;">开始压缩</button>
             </div>
         </div>
     </div>
@@ -1688,9 +1970,9 @@
             const selectedImages = state.filteredFiles.filter(f => f.selected && f.type === 'image');
             const count = selectedImages.length;
             
-            document.getElementById('compressSelectedText').textContent = `(已选中 ${count} 个图片)`;
-            
             const compressBtn = document.getElementById('compressBtn');
+            compressBtn.textContent = `🗜️ 压缩图片 (${count})`;
+            
             if (count > 0) {
                 compressBtn.disabled = false;
                 compressBtn.style.opacity = '1';
@@ -1769,15 +2051,102 @@
         // 设置压缩格式
         function setFormat(format) {
             state.compressFormat = format;
-            document.querySelectorAll('.format-btn').forEach(btn => {
-                btn.classList.remove('active');
+            document.getElementById('compressFormatSelect').value = format;
+        }
+        
+        // 监听下拉框变化
+        document.getElementById('compressFormatSelect').addEventListener('change', function() {
+            state.compressFormat = this.value;
+        });
+
+        // 显示压缩选项弹窗
+        function showCompressDialog() {
+            document.getElementById('compressModal').style.display = 'flex';
+            // 重置选项
+            document.querySelector('input[name="compressOption"][value="overwrite"]').checked = true;
+            document.getElementById('outputDirSelector').style.display = 'none';
+            document.getElementById('modalOutputDir').value = '';
+        }
+
+        // 关闭压缩选项弹窗
+        function closeCompressModal() {
+            document.getElementById('compressModal').style.display = 'none';
+        }
+
+        // 监听压缩选项变化
+        document.addEventListener('DOMContentLoaded', function() {
+            const compressOptions = document.querySelectorAll('input[name="compressOption"]');
+            compressOptions.forEach(option => {
+                option.addEventListener('change', function() {
+                    const outputDirSelector = document.getElementById('outputDirSelector');
+                    if (this.value === 'newdir') {
+                        outputDirSelector.style.display = 'block';
+                    } else {
+                        outputDirSelector.style.display = 'none';
+                    }
+                });
             });
-            event.target.classList.add('active');
+        });
+
+        // 确认压缩
+        function confirmCompress() {
+            const selectedOption = document.querySelector('input[name="compressOption"]:checked').value;
+            
+            if (selectedOption === 'newdir') {
+                const outputDir = document.getElementById('modalOutputDir').value;
+                if (!outputDir) {
+                    alert('请选择输出目录');
+                    return;
+                }
+                state.outputDir = outputDir;
+            } else {
+                state.outputDir = '';
+            }
+
+            closeCompressModal();
+            compressFiles();
         }
 
         // 压缩文件
         async function compressFiles() {
-            showMessage('压缩功能面板已移除', 'error');
+            const selectedImages = state.filteredFiles.filter(f => f.selected && f.type === 'image');
+            
+            if (selectedImages.length === 0) {
+                showMessage('请先选择要压缩的图片', 'error');
+                return;
+            }
+
+            const quality = parseInt(document.getElementById('quality').value);
+            const format = state.compressFormat;
+            const outputDir = document.getElementById('outputDir').value.trim();
+
+            showMessage(`正在压缩 ${selectedImages.length} 个图片...`, 'info');
+
+            try {
+                const response = await fetch('/api/compress', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        files: selectedImages.map(f => f.path),
+                        quality: quality,
+                        format: format,
+                        output_dir: outputDir
+                    })
+                });
+
+                if (response.ok) {
+                    await handleCompressStream(response);
+                    // 压缩完成后刷新文件列表
+                    await loadFiles(state.currentDirectory);
+                } else {
+                    const error = await response.json();
+                    showMessage('压缩失败：' + error.message, 'error');
+                }
+            } catch (error) {
+                showMessage('压缩请求失败：' + error.message, 'error');
+            }
         }
 
         async function handleCompressStream(response) {
