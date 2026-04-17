@@ -178,7 +178,8 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    background: var(--background);
+    /* 移除纯色背景,让 body 的渐变透过来 */
+    background: transparent;
 }
 
 /* 统计栏 - Apple 风格 */

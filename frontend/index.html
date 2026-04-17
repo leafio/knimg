@@ -6,10 +6,10 @@
     <title>KnImg - 文件管理与图片压缩工具</title>
 
     <!-- 引入外部 CSS 文件 -->
-    <link rel="stylesheet" href="css/base.css">
-    <link rel="stylesheet" href="css/layout.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/responsive.css">
+    <link rel="stylesheet" href="css/base.css?v=11">
+    <link rel="stylesheet" href="css/layout.css?v=11">
+    <link rel="stylesheet" href="css/components.css?v=11">
+    <link rel="stylesheet" href="css/responsive.css?v=11">
 </head>
 <body>
     <!-- 顶部导航栏 -->
@@ -48,10 +48,10 @@
                 </div>
             </div>
             
-            <button class="btn" id="refreshBtn" onclick="loadFiles()">🔄 刷新列表</button>
+            <button class="btn btn-refresh" id="refreshBtn" onclick="loadFiles()">🔄 刷新列表</button>
             
             <div class="dropdown">
-                <button class="btn" onclick="toggleExportMenu()">📤 导出</button>
+                <button class="btn btn-secondary" onclick="toggleExportMenu()">📤 导出</button>
                 <div class="dropdown-menu" id="exportMenu">
                     <div class="dropdown-item" onclick="exportFiles('excel')">📊 Excel</div>
                     <div class="dropdown-item" onclick="exportFiles('csv')">📄 CSV</div>
@@ -101,19 +101,19 @@
 
             <div class="filter-section">
                 <div class="filter-title">📊 排序方式</div>
-                <div class="sort-group">
+                <div class="sort-group" id="sortFieldGroup">
                     <button class="sort-btn active" onclick="setSort('name')">名称</button>
                     <button class="sort-btn" onclick="setSort('size')">大小</button>
                     <button class="sort-btn" onclick="setSort('type')">类型</button>
                     <button class="sort-btn" onclick="setSort('time')">时间</button>
                 </div>
-                <div class="sort-group" style="margin-top: 8px;">
+                <div class="sort-group" id="sortOrderGroup" style="margin-top: 8px;">
                     <button class="sort-btn active" onclick="setSortOrder('asc')">升序 ↑</button>
                     <button class="sort-btn" onclick="setSortOrder('desc')">降序 ↓</button>
                 </div>
             </div>
 
-            <button class="btn" onclick="clearFilters()" style="width: 100%; margin-top: 16px;">🔄 清除筛选</button>
+            <button class="btn btn-secondary" onclick="clearFilters()">🔄 清除筛选</button>
         </aside>
 
         <!-- 主内容区 -->
@@ -159,7 +159,7 @@
 
                         <div class="compress-divider"></div>
 
-                        <button class="btn btn-success" id="compressBtn" onclick="compressFiles()" disabled style="padding: 4px 12px; font-size: 12px; margin-left: auto;">🗜️ 压缩图片 (0)</button>
+                        <button class="btn btn-compress" id="compressBtn" onclick="compressFiles()" disabled>🗜️ 压缩图片 (0)</button>
                     </div>
                 </div>
             </div>
@@ -277,6 +277,6 @@
     <div id="messageContainer"></div>
 
     <!-- 引入外部 JavaScript 文件 -->
-    <script type="module" src="js/app.js"></script>
+    <script type="module" src="js/app.js?v=11"></script>
 </body>
 </html>

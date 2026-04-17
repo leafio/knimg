@@ -102,7 +102,8 @@ export function toggleCustomSize() {
 // 设置排序字段
 export function setSort(field, state, elements) {
     state.sortBy = field;
-    document.querySelectorAll('.sort-group:first-of-type .sort-btn').forEach(btn => {
+    // 只清除排序字段组的按钮状态
+    document.querySelectorAll('#sortFieldGroup .sort-btn').forEach(btn => {
         btn.classList.remove('active');
     });
     event.target.classList.add('active');
@@ -112,7 +113,8 @@ export function setSort(field, state, elements) {
 // 设置排序顺序
 export function setSortOrder(order, state, elements) {
     state.sortOrder = order;
-    document.querySelectorAll('.sort-group:nth-of-type(2) .sort-btn').forEach(btn => {
+    // 只清除排序方向组的按钮状态
+    document.querySelectorAll('#sortOrderGroup .sort-btn').forEach(btn => {
         btn.classList.remove('active');
     });
     event.target.classList.add('active');
