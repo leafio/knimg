@@ -102,7 +102,11 @@ async function browseDirectoryInModal(path) {
 function renderDirectoryList(directories) {
     elements.directoryList.innerHTML = directories.map(dir => `
         <div class="directory-item ${dir === '..' ? 'parent' : ''}" onclick="navigateToDirectory('${dir}')">
-            <span class="directory-icon">${dir === '..' ? '📂..' : '📁'}</span>
+            <span class="directory-icon">
+                ${dir === '..' ? 
+                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 1 1 0 8h-1"/></svg>..' : 
+                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>'}
+            </span>
             <span class="directory-name">${dir === '..' ? '上级目录' : dir}</span>
         </div>
     `).join('');
