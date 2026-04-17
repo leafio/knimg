@@ -11,8 +11,18 @@ export function renderFileList(fileList, state) {
     const emptyStateEl = document.getElementById('emptyState');
 
     if (fileList.length === 0) {
-        emptyStateEl.style.display = 'block';
-        fileListEl.style.display = 'none';
+        // 判断是否已选择目录
+        const hasSelectedDir = state.currentBrowsePath && state.currentBrowsePath !== '';
+        
+        if (!hasSelectedDir) {
+            // 未选择目录,显示欢迎界面
+            emptyStateEl.style.display = 'block';
+            fileListEl.style.display = 'none';
+        } else {
+            // 已选择目录但无结果,显示空结果提示
+            showEmptyResult(emptyStateEl);
+            fileListEl.style.display = 'none';
+        }
         return;
     }
 
@@ -71,6 +81,28 @@ export function renderFileList(fileList, state) {
             updateCompressPanel(state);
         });
     });
+}
+
+// 显示空结果提示
+function showEmptyResult(emptyStateEl) {
+    emptyStateEl.innerHTML = `
+        <div class="empty-state-icon">
+            <svg width="72" height="72" viewBox="0 0 24 24" fill="none" stroke="#86868B" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="opacity: 0.3;">
+                <circle cx="11" cy="11" r="8"></circle>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                <line x1="8" y1="11" x2="14" y2="11"></line>
+            </svg>
+        </div>
+        <h3>暂无符合条件的文件</h3>
+        <p>当前筛选条件下没有找到匹配的文件</p>
+        <button class="btn btn-secondary" onclick="clearFilters()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 6px; vertical-align: middle;">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+            </svg>
+            清除筛选条件
+        </button>
+    `;
 }
 
 // 全选/取消全选

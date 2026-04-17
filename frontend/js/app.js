@@ -62,6 +62,9 @@ export async function loadFiles(workDir) {
         return;
     }
 
+    // 更新当前浏览路径状态
+    state.currentBrowsePath = path;
+
     showProgress('正在加载文件列表...');
     try {
         const result = await apiLoadFiles(path);
