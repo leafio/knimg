@@ -16,9 +16,9 @@ export const state = {
     currentBrowsePath: '',
     activeDirectoryInput: null,
     currentExportFormat: null,
-    sortBy: 'name',
-    sortOrder: 'asc',
-    compressFormat: 'webp',
+    sortBy: 'size',
+    sortOrder: 'desc',
+    compressFormat: '',
     outputDir: ''
 };
 

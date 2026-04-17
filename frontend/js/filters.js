@@ -135,13 +135,14 @@ export function clearFilters(state, elements) {
     elements.maxSize.value = '';
     document.getElementById('customSizeInput').style.display = 'none';
     document.querySelectorAll('.preset-btn').forEach(btn => btn.classList.remove('active'));
-    state.sortBy = 'name';
-    state.sortOrder = 'asc';
+    state.sortBy = 'size';
+    state.sortOrder = 'desc';
     
     // 重置排序按钮
-    document.querySelectorAll('.sort-btn').forEach((btn, index) => {
-        btn.classList.toggle('active', index === 0 || index === 4);
-    });
+    document.querySelectorAll('#sortFieldGroup .sort-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('#sortOrderGroup .sort-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector('#sortFieldGroup .sort-btn:nth-child(2)').classList.add('active');
+    document.querySelector('#sortOrderGroup .sort-btn:nth-child(2)').classList.add('active');
     
     applyFilters(state, elements);
 }

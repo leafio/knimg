@@ -6,10 +6,10 @@
     <title>KnImg - 文件管理与图片压缩工具</title>
 
     <!-- 引入外部 CSS 文件 -->
-    <link rel="stylesheet" href="css/base.css?v=29">
-    <link rel="stylesheet" href="css/layout.css?v=29">
-    <link rel="stylesheet" href="css/components.css?v=29">
-    <link rel="stylesheet" href="css/responsive.css?v=29">
+    <link rel="stylesheet" href="css/base.css?v=31">
+    <link rel="stylesheet" href="css/layout.css?v=31">
+    <link rel="stylesheet" href="css/components.css?v=31">
+    <link rel="stylesheet" href="css/responsive.css?v=31">
 </head>
 <body>
     <!-- 顶部导航栏 -->
@@ -171,14 +171,14 @@
                     排序方式
                 </div>
                 <div class="sort-group" id="sortFieldGroup">
-                    <button class="sort-btn active" onclick="setSort('name')">名称</button>
-                    <button class="sort-btn" onclick="setSort('size')">大小</button>
+                    <button class="sort-btn" onclick="setSort('name')">名称</button>
+                    <button class="sort-btn active" onclick="setSort('size')">大小</button>
                     <button class="sort-btn" onclick="setSort('type')">类型</button>
                     <button class="sort-btn" onclick="setSort('time')">时间</button>
                 </div>
                 <div class="sort-group" id="sortOrderGroup" style="margin-top: 8px;">
-                    <button class="sort-btn active" onclick="setSortOrder('asc')">升序 ↑</button>
-                    <button class="sort-btn" onclick="setSortOrder('desc')">降序 ↓</button>
+                    <button class="sort-btn" onclick="setSortOrder('asc')">升序 ↑</button>
+                    <button class="sort-btn active" onclick="setSortOrder('desc')">降序 ↓</button>
                 </div>
             </div>
 
@@ -199,10 +199,10 @@
                     <div class="compress-row">
                         <div class="compress-field">
                             <select class="filter-input" id="compressFormatSelect" style="width: 90px; padding: 4px 8px; font-size: 12px;" data-tooltip="选择输出图片格式">
+                                <option value="" selected>原格式</option>
                                 <option value="webp">WebP</option>
                                 <option value="jpeg">JPEG</option>
                                 <option value="png">PNG</option>
-                                <option value="">原格式</option>
                             </select>
                         </div>
 
@@ -368,6 +368,6 @@
     <div id="messageContainer"></div>
 
     <!-- 引入外部 JavaScript 文件 -->
-    <script type="module" src="js/app.js?v=29"></script>
+    <script type="module" src="js/app.js?v=31"></script>
 </body>
 </html>
