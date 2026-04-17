@@ -6,10 +6,10 @@
     <title>KnImg - 文件管理与图片压缩工具</title>
 
     <!-- 引入外部 CSS 文件 -->
-    <link rel="stylesheet" href="css/base.css?v=15">
-    <link rel="stylesheet" href="css/layout.css?v=15">
-    <link rel="stylesheet" href="css/components.css?v=15">
-    <link rel="stylesheet" href="css/responsive.css?v=15">
+    <link rel="stylesheet" href="css/base.css?v=16">
+    <link rel="stylesheet" href="css/layout.css?v=16">
+    <link rel="stylesheet" href="css/components.css?v=16">
+    <link rel="stylesheet" href="css/responsive.css?v=16">
 </head>
 <body>
     <!-- 顶部导航栏 -->
@@ -198,17 +198,7 @@
                 <div class="compress-content">
                     <div class="compress-row">
                         <div class="compress-field">
-                            <div class="tooltip-wrapper">
-                                <span class="tooltip-icon">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="12" cy="12" r="10"></circle>
-                                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                                    </svg>
-                                </span>
-                                <span class="tooltip-text">选择输出图片格式</span>
-                            </div>
-                            <select class="filter-input" id="compressFormatSelect" style="width: 90px; padding: 4px 8px; font-size: 12px;">
+                            <select class="filter-input" id="compressFormatSelect" style="width: 90px; padding: 4px 8px; font-size: 12px;" data-tooltip="选择输出图片格式">
                                 <option value="webp">WebP</option>
                                 <option value="jpeg">JPEG</option>
                                 <option value="png">PNG</option>
@@ -217,17 +207,7 @@
                         </div>
 
                         <div class="compress-field">
-                            <div class="tooltip-wrapper">
-                                <span class="tooltip-icon">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="12" cy="12" r="10"></circle>
-                                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                                    </svg>
-                                </span>
-                                <span class="tooltip-text">留空则覆盖原文件</span>
-                            </div>
-                            <div class="output-dir-input-wrapper">
+                            <div class="output-dir-input-wrapper" data-tooltip="留空则覆盖原文件">
                                 <input type="text" class="filter-input" id="outputDir" placeholder="选择目录" style="width: 160px; padding: 4px 32px 4px 8px; font-size: 12px;">
                                 <button class="output-dir-btn" onclick="openDirectoryBrowser('outputDir')">
                                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -238,17 +218,7 @@
                         </div>
                         
                         <div class="compress-field">
-                            <div class="tooltip-wrapper">
-                                <span class="tooltip-icon">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                                        <circle cx="12" cy="12" r="10"></circle>
-                                        <line x1="12" y1="16" x2="12" y2="12"></line>
-                                        <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                                    </svg>
-                                </span>
-                                <span class="tooltip-text">压缩质量 10-100</span>
-                            </div>
-                            <div class="quality-slider">
+                            <div class="quality-slider" data-tooltip="压缩质量 10-100">
                                 <input type="range" id="quality" min="10" max="100" value="80" style="width: 80px;">
                                 <span class="quality-value" id="qualityValue" style="font-size: 12px; min-width: 32px;">80%</span>
                             </div>
@@ -396,6 +366,6 @@
     <div id="messageContainer"></div>
 
     <!-- 引入外部 JavaScript 文件 -->
-    <script type="module" src="js/app.js?v=15"></script>
+    <script type="module" src="js/app.js?v=16"></script>
 </body>
 </html>
