@@ -1,0 +1,19 @@
+/* ========== 响应式样式 ========== */
+
+@media (max-width: 768px) {
+    .filter-panel {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .main-layout {
+        flex-direction: column;
+    }
+
+    .empty-state-steps {
+        flex-direction: column;
+        gap: 20px;
+        align-items: center;
+    }
+}

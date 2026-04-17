@@ -1,0 +1,33 @@
+/* ========== 基础样式 ========== */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+    /* Apple 风格配色 */
+    --primary: #007AFF;
+    --primary-dark: #0051D5;
+    --primary-light: rgba(0, 122, 255, 0.1);
+    --accent: #5856D6;
+    --success: #34C759;
+    --warning: #FF9500;
+    --danger: #FF3B30;
+    --background: #F5F5F7;
+    --surface: #FFFFFF;
+    --surface-hover: #F9F9F9;
+    --text: #1D1D1F;
+    --text-secondary: #86868B;
+    --border: rgba(0, 0, 0, 0.08);
+    --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.04);
+    --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    --shadow-lg: 0 12px 24px rgba(0, 0, 0, 0.12);
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
+    background: var(--background);
+    color: var(--text);
+    line-height: 1.5;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
