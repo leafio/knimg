@@ -57,6 +57,7 @@ export function updateStats(stats) {
 // 加载文件列表
 export async function loadFiles(workDir) {
     const path = workDir || document.getElementById('pathText').textContent;
+    
     if (path === '未选择目录') {
         showMessage('请先选择工作目录', 'error');
         return;
@@ -146,7 +147,32 @@ export function selectDirectory() {
         // 工作目录
         document.getElementById('pathText').textContent = state.currentBrowsePath;
         closeDirectoryBrowser();
-        loadFiles();
+        
+        console.log('📁 选择目录 - 隐藏欢迎界面');
+        console.log('📁 welcomeState:', document.getElementById('welcomeState'));
+        console.log('📁 fileList:', document.getElementById('fileList'));
+        
+        // 直接控制DOM显示/隐藏
+        const welcomeEl = document.getElementById('welcomeState');
+        const fileListEl = document.getElementById('fileList');
+        
+        if (welcomeEl) {
+            welcomeEl.style.display = 'none';
+            console.log('✅ 已隐藏欢迎界面');
+        } else {
+            console.error('❌ 找不到 welcomeState 元素');
+        }
+        
+        if (fileListEl) {
+            fileListEl.style.display = 'block';
+            console.log('✅ 已显示文件列表');
+        } else {
+            console.error('❌ 找不到 fileList 元素');
+        }
+        
+        // 直接传递路径给loadFiles
+        console.log('📁 开始加载文件:', state.currentBrowsePath);
+        loadFiles(state.currentBrowsePath);
     }
 }
 

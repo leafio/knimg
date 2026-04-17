@@ -171,9 +171,16 @@
 }
 
 .btn.btn-compress:disabled {
-    opacity: 0.5;
+    opacity: 1;
     cursor: not-allowed;
-    background: linear-gradient(to bottom, #D2B4DE 0%, #C39BD3 100%);
+    /* 使用白色半透明背景 + 紫色边框，保持视觉通透 */
+    background: rgba(175, 82, 222, 0.08);
+    border: 1.5px solid rgba(175, 82, 222, 0.3);
+    color: rgba(175, 82, 222, 0.6);
+}
+
+.btn.btn-compress:disabled svg {
+    stroke: rgba(175, 82, 222, 0.6);
 }
 
 .btn-link {
@@ -576,21 +583,28 @@
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-/* 空状态 - Apple 风格 */
+/* 空状态 - Apple 风格（筛选后无结果） */
 .empty-state {
     text-align: center;
     padding: 100px 20px;
     color: var(--text-secondary);
 }
 
-.empty-state-icon {
+/* 欢迎界面 - Apple 风格（未选择目录） */
+.welcome-state {
+    text-align: center;
+    padding: 100px 20px;
+    color: var(--text-secondary);
+}
+
+.welcome-state-icon {
     font-size: 72px;
     margin-bottom: 24px;
     opacity: 0.15;
     filter: none;
 }
 
-.empty-state h3 {
+.welcome-state h3 {
     font-size: 22px;
     font-weight: 600;
     margin-bottom: 8px;
@@ -598,12 +612,12 @@
     letter-spacing: -0.5px;
 }
 
-.empty-state p {
+.welcome-state p {
     margin-bottom: 28px;
     font-size: 15px;
 }
 
-.empty-state-steps {
+.welcome-state-steps {
     display: flex;
     gap: 40px;
     justify-content: center;

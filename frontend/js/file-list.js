@@ -8,38 +8,28 @@ import { formatSize } from './utils.js';
 // 渲染文件列表
 export function renderFileList(fileList, state) {
     const fileListEl = document.getElementById('fileList');
-    const welcomeStateEl = document.getElementById('welcomeState');
-    const emptyResultStateEl = document.getElementById('emptyResultState');
 
+    console.log('🎨 renderFileList 被调用');
+    console.log('🎨 fileList 长度:', fileList.length);
+    console.log('🎨 fileListEl:', fileListEl);
+
+    // 显示文件列表
+    fileListEl.style.display = 'block';
+    console.log('✅ fileListEl.style.display 设置为 block');
+
+    // 如果文件列表为空,显示空提示
     if (fileList.length === 0) {
-        // 判断是否已选择目录
-        const hasSelectedDir = state.currentBrowsePath && state.currentBrowsePath !== '';
-        
-        fileListEl.style.display = 'none';
-        
-        if (!hasSelectedDir) {
-            // 未选择目录,显示欢迎界面
-            welcomeStateEl.style.display = 'block';
-            emptyResultStateEl.style.display = 'none';
-        } else {
-            // 已选择目录但无结果,显示空结果提示
-            welcomeStateEl.style.display = 'none';
-            emptyResultStateEl.style.display = 'block';
-        }
+        fileListEl.innerHTML = '<div class="empty-result">暂无符合条件的文件</div>';
+        console.log('📝 文件列表为空，显示空提示');
         return;
     }
-
-    // 有文件时,隐藏所有空状态,显示文件列表
-    welcomeStateEl.style.display = 'none';
-    emptyResultStateEl.style.display = 'none';
-    fileListEl.style.display = 'block';
 
     const maxSize = Math.max(...fileList.map(f => f.size || 0));
 
     fileListEl.innerHTML = `
         <div class="file-list">
             <div class="file-list-header">
-                <input type="checkbox" class="file-checkbox" onchange="toggleSelectAll(this)">
+                <input type="checkbox" id="selectAllCheckbox" class="file-checkbox">
                 <div class="file-info">文件名</div>
                 <div class="file-size">大小</div>
             </div>
@@ -76,14 +66,30 @@ export function renderFileList(fileList, state) {
         </div>
     `;
 
-    // 添加复选框事件
-    document.querySelectorAll('.file-checkbox:not([disabled])').forEach(cb => {
+    // 添加全选复选框事件
+    const selectAllCb = document.getElementById('selectAllCheckbox');
+    if (selectAllCb) {
+        selectAllCb.addEventListener('change', function() {
+            toggleSelectAll(this, state);
+        });
+    }
+
+    // 添加单项复选框事件
+    document.querySelectorAll('.file-checkbox[data-index]').forEach(cb => {
         cb.addEventListener('change', function() {
             const index = parseInt(this.dataset.index);
             if (state.filteredFiles[index]) {
                 state.filteredFiles[index].selected = this.checked;
             }
             updateCompressPanel(state);
+            
+            // 更新全选框状态
+            const allItems = state.filteredFiles.filter(f => f.type === 'image');
+            const selectedItems = allItems.filter(f => f.selected);
+            if (selectAllCb) {
+                selectAllCb.checked = allItems.length > 0 && allItems.length === selectedItems.length;
+                selectAllCb.indeterminate = selectedItems.length > 0 && selectedItems.length < allItems.length;
+            }
         });
     });
 }
