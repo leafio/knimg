@@ -7,39 +7,6 @@ import { compressImages } from './api.js';
 import { showMessage, showProgress, updateProgress, hideProgress } from './utils.js';
 import { loadFiles } from './app.js';
 
-// 显示压缩选项弹窗
-export function showCompressDialog() {
-    document.getElementById('compressModal').style.display = 'flex';
-    // 重置选项
-    document.querySelector('input[name="compressOption"][value="overwrite"]').checked = true;
-    document.getElementById('outputDirSelector').style.display = 'none';
-    document.getElementById('modalOutputDir').value = '';
-}
-
-// 关闭压缩选项弹窗
-export function closeCompressModal() {
-    document.getElementById('compressModal').style.display = 'none';
-}
-
-// 确认压缩选项
-export function confirmCompress(state) {
-    const selectedOption = document.querySelector('input[name="compressOption"]:checked').value;
-    
-    if (selectedOption === 'newdir') {
-        const outputDir = document.getElementById('modalOutputDir').value;
-        if (!outputDir) {
-            alert('请选择输出目录');
-            return;
-        }
-        state.outputDir = outputDir;
-    } else {
-        state.outputDir = '';
-    }
-
-    closeCompressModal();
-    executeCompression(state);
-}
-
 // 执行压缩
 export async function executeCompression(state) {
     const selectedImages = state.filteredFiles.filter(f => f.selected && f.type === 'image');

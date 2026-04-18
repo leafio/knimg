@@ -7,7 +7,7 @@ import { browseDirectory, loadFiles as apiLoadFiles, exportFiles as apiExportFil
 import { showMessage, showProgress, hideProgress, debounce } from './utils.js';
 import { applyFilters, removeFilterTag, applySizePreset, toggleCustomSize, setSort, setSortOrder, selectExtension, clearFilters } from './filters.js';
 import { renderFileList, toggleSelectAll, updateCompressPanel } from './file-list.js';
-import { showCompressDialog, closeCompressModal, confirmCompress, executeCompression } from './compress.js';
+import { executeCompression } from './compress.js';
 
 // 全局状态
 export const state = {
@@ -258,19 +258,6 @@ function initializeApp() {
         state.compressFormat = this.value;
     });
 
-    // 监听压缩选项变化
-    const compressOptions = document.querySelectorAll('input[name="compressOption"]');
-    compressOptions.forEach(option => {
-        option.addEventListener('change', function() {
-            const outputDirSelector = document.getElementById('outputDirSelector');
-            if (this.value === 'newdir') {
-                outputDirSelector.style.display = 'block';
-            } else {
-                outputDirSelector.style.display = 'none';
-            }
-        });
-    });
-
     // 点击模态框外部关闭
     elements.directoryModal.addEventListener('click', function(e) {
         if (e.target === elements.directoryModal) closeDirectoryBrowser();
@@ -301,9 +288,6 @@ function initializeApp() {
     window.toggleExportMenu = toggleExportMenu;
     window.exportFiles = exportFiles;
     window.setFormat = setFormat;
-    window.showCompressDialog = showCompressDialog;
-    window.closeCompressModal = closeCompressModal;
-    window.confirmCompress = () => confirmCompress(state);
     window.compressFiles = () => executeCompression(state);
     
     console.log('✅ KnImg 应用初始化完成');
