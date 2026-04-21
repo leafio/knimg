@@ -118,19 +118,11 @@ func InitServer(isDevMode bool) (http.Handler, string) {
 		log.Println("✓ 本地前端资源加载成功")
 	} else {
 		// 生产模式：使用嵌入的前端资源
+		frontendFS := GetEmbeddedFrontend()
+		frontendHandler := http.FileServer(frontendFS)
+		mux.Handle("/", frontendHandler)
 		fmt.Println("✓ 嵌入前端资源加载成功")
 		log.Println("✓ 嵌入前端资源加载成功")
-
-		// 提供嵌入的前端index.html
-		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-			if r.URL.Path == "/" {
-				w.Header().Set("Content-Type", "text/html; charset=utf-8")
-				w.WriteHeader(http.StatusOK)
-				w.Write(indexHTMLContent)
-			} else {
-				http.NotFound(w, r)
-			}
-		})
 	}
 
 	// API 路由
