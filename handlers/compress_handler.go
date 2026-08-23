@@ -48,7 +48,7 @@ func (h *CompressHandler) CompressFiles(w http.ResponseWriter, r *http.Request) 
 	}
 
 	// 调用压缩服务
-	result := h.compressService.CompressFiles(req.Files, req.Quality, req.WorkDir, req.OutputDir, req.Overwrite)
+	result := h.compressService.CompressFiles(req.Files, req.Quality, req.WorkDir, req.OutputDir, req.Overwrite, req.Format)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)

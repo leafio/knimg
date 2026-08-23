@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-//go:embed frontend/*
+//go:embed frontend/index.html frontend/css/*.css frontend/js/*.js
 var embeddedFS embed.FS
 
 // GetEmbeddedFrontend 获取嵌入的前端文件系统

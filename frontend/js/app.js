@@ -8,6 +8,7 @@ import { showMessage, showProgress, hideProgress, debounce } from './utils.js';
 import { applyFilters, removeFilterTag, applySizePreset, toggleCustomSize, setSort, setSortOrder, selectExtension, clearFilters } from './filters.js';
 import { renderFileList, toggleSelectAll, updateCompressPanel } from './file-list.js';
 import { executeCompression } from './compress.js';
+import { initPreviewEvents } from './preview.js';
 
 // 全局状态
 export const state = {
@@ -81,13 +82,11 @@ export async function loadFiles(workDir) {
 
 // 目录浏览器
 export async function openDirectoryBrowser(inputId) {
-    console.log('📁 openDirectoryBrowser 被调用, inputId:', inputId);
     state.activeDirectoryInput = inputId;
     const isExport = inputId === 'outputDir';
     document.getElementById('modalTitle').textContent = isExport ? '选择输出目录' : '选择工作目录';
     await browseDirectoryInModal('');
     elements.directoryModal.classList.add('show');
-    console.log('✅ 模态框已显示');
 }
 
 // 在模态框中浏览目录
@@ -104,16 +103,26 @@ async function browseDirectoryInModal(path) {
 
 // 渲染目录列表
 function renderDirectoryList(directories) {
-    elements.directoryList.innerHTML = directories.map(dir => `
-        <div class="directory-item ${dir === '..' ? 'parent' : ''}" onclick="navigateToDirectory('${dir}')">
-            <span class="directory-icon">
-                ${dir === '..' ? 
-                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 1 1 0 8h-1"/></svg>..' : 
-                    '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>'}
-            </span>
-            <span class="directory-name">${dir === '..' ? '上级目录' : dir}</span>
-        </div>
-    `).join('');
+    elements.directoryList.innerHTML = '';
+    directories.forEach(dir => {
+        const item = document.createElement('div');
+        item.className = 'directory-item' + (dir === '..' ? ' parent' : '');
+
+        const icon = document.createElement('span');
+        icon.className = 'directory-icon';
+        icon.innerHTML = dir === '..'
+            ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14l-4-4 4-4"/><path d="M5 10h11a4 4 0 1 1 0 8h-1"/></svg>'
+            : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>';
+
+        const name = document.createElement('span');
+        name.className = 'directory-name';
+        name.textContent = dir === '..' ? '上级目录' : dir;
+
+        item.appendChild(icon);
+        item.appendChild(name);
+        item.addEventListener('click', () => navigateToDirectory(dir));
+        elements.directoryList.appendChild(item);
+    });
 }
 
 // 导航到目录
@@ -147,31 +156,15 @@ export function selectDirectory() {
         // 工作目录
         document.getElementById('pathText').textContent = state.currentBrowsePath;
         closeDirectoryBrowser();
-        
-        console.log('📁 选择目录 - 隐藏欢迎界面');
-        console.log('📁 welcomeState:', document.getElementById('welcomeState'));
-        console.log('📁 fileList:', document.getElementById('fileList'));
-        
+
         // 直接控制DOM显示/隐藏
         const welcomeEl = document.getElementById('welcomeState');
         const fileListEl = document.getElementById('fileList');
-        
-        if (welcomeEl) {
-            welcomeEl.style.display = 'none';
-            console.log('✅ 已隐藏欢迎界面');
-        } else {
-            console.error('❌ 找不到 welcomeState 元素');
-        }
-        
-        if (fileListEl) {
-            fileListEl.style.display = 'block';
-            console.log('✅ 已显示文件列表');
-        } else {
-            console.error('❌ 找不到 fileList 元素');
-        }
-        
+
+        if (welcomeEl) welcomeEl.style.display = 'none';
+        if (fileListEl) fileListEl.style.display = 'block';
+
         // 直接传递路径给loadFiles
-        console.log('📁 开始加载文件:', state.currentBrowsePath);
         loadFiles(state.currentBrowsePath);
     }
 }
@@ -242,6 +235,8 @@ export function init() {
 
 // 实际的应用初始化逻辑
 function initializeApp() {
+    initPreviewEvents();
+
     // 搜索输入实时筛选
     elements.searchInput.addEventListener('input', debounce(() => applyFilters(state, elements), 300));
     elements.fileExt.addEventListener('input', debounce(() => applyFilters(state, elements), 300));
@@ -281,7 +276,7 @@ function initializeApp() {
     window.toggleCustomSize = toggleCustomSize;
     window.setSort = (field) => setSort(field, state, elements);
     window.setSortOrder = (order) => setSortOrder(order, state, elements);
-    window.selectExtension = (ext) => selectExtension(ext, elements);
+    window.selectExtension = (ext) => selectExtension(ext, state, elements);
     window.clearFilters = () => clearFilters(state, elements);
     window.removeFilterTag = (type) => removeFilterTag(type, state, elements);
     window.toggleSelectAll = (cb) => toggleSelectAll(cb, state);
@@ -289,7 +284,7 @@ function initializeApp() {
     window.exportFiles = exportFiles;
     window.setFormat = setFormat;
     window.compressFiles = () => executeCompression(state);
-    
+
     console.log('✅ KnImg 应用初始化完成');
 }
 

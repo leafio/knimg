@@ -943,3 +943,91 @@
     font-size: 14px;
     white-space: nowrap;
 }
+
+/* ===== 图片缩略图与大图预览 ===== */
+.file-thumb-link {
+    display: inline-flex;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+    cursor: zoom-in;
+    background: var(--bg-secondary, #f2f2f7);
+    vertical-align: middle;
+}
+
+.file-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.15s ease;
+}
+
+.file-thumb-link:hover .file-thumb {
+    transform: scale(1.08);
+}
+
+.file-thumb-placeholder {
+    display: inline-block;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    background: var(--bg-secondary, #f2f2f7);
+    flex-shrink: 0;
+}
+
+.image-preview-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+}
+
+.image-preview-overlay.show {
+    display: flex;
+}
+
+.image-preview-img {
+    max-width: 90vw;
+    max-height: 88vh;
+    object-fit: contain;
+    border-radius: 6px;
+    box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+}
+
+.image-preview-close {
+    position: absolute;
+    top: 16px;
+    right: 20px;
+    width: 36px;
+    height: 36px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    color: #fff;
+    font-size: 22px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s ease;
+}
+
+.image-preview-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.image-preview-title {
+    position: absolute;
+    top: 20px;
+    left: 24px;
+    max-width: 60vw;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}

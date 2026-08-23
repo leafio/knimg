@@ -6,6 +6,7 @@
 import { filterFiles } from './api.js';
 import { renderFileList } from './file-list.js';
 import { updateStats } from './app.js';
+import { escapeHtml } from './utils.js';
 
 // 构建筛选参数
 export function buildFilterParams(state, elements) {
@@ -61,7 +62,7 @@ export function updateFilterTags(elements) {
 
     container.innerHTML = tags.map(tag => `
         <span class="filter-tag">
-            ${tag.label}
+            ${escapeHtml(tag.label)}
             <span class="close" onclick="removeFilterTag('${tag.type}')">×</span>
         </span>
     `).join('');
@@ -122,9 +123,9 @@ export function setSortOrder(order, state, elements) {
 }
 
 // 选择扩展名快捷方式
-export function selectExtension(extensions, elements) {
+export function selectExtension(extensions, state, elements) {
     elements.fileExt.value = extensions;
-    applyFilters(null, elements);
+    applyFilters(state, elements);
 }
 
 // 清除所有筛选

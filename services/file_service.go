@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"encoding/json"
 	"fmt"
+	"io/fs"
 	"knimg/models"
 	"os"
 	"path/filepath"
@@ -48,30 +49,42 @@ func (s *FileService) ScanFilesWithFilter(workDir string, req *models.FileListRe
 		return files, nil
 	}
 
-	err := filepath.Walk(workDir, func(path string, info os.FileInfo, err error) error {
+	if _, err := os.Stat(workDir); os.IsNotExist(err) {
+		return nil, fmt.Errorf("目录不存在: %s", workDir)
+	}
+
+	err := filepath.WalkDir(workDir, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
-			return err
+			return nil
 		}
 
-		if !info.IsDir() {
-			relPath, _ := filepath.Rel(workDir, path)
-			fileType := s.GetFileType(info.Name())
-			fileExt := strings.ToLower(filepath.Ext(info.Name()))
-			
-			file := models.FileInfo{
-				Name:       info.Name(),
-				Path:       relPath,
-				Size:       info.Size(),
-				Type:       fileType,
-				Ext:        fileExt,
-				ModTime:    info.ModTime().Format("2006-01-02 15:04:05"),
-				Compressed: false,
-			}
+		if d.IsDir() {
+			return nil
+		}
 
-			// 应用筛选条件
-			if s.MatchesFilter(file, req) {
-				files = append(files, file)
-			}
+		info, err := d.Info()
+		if err != nil {
+			return nil
+		}
+
+		name := d.Name()
+		relPath, _ := filepath.Rel(workDir, path)
+		fileType := s.GetFileType(name)
+		fileExt := strings.ToLower(filepath.Ext(name))
+
+		file := models.FileInfo{
+			Name:       name,
+			Path:       relPath,
+			Size:       info.Size(),
+			Type:       fileType,
+			Ext:        fileExt,
+			ModTime:    info.ModTime().Format("2006-01-02 15:04:05"),
+			Compressed: false,
+		}
+
+		// 应用筛选条件
+		if s.MatchesFilter(file, req) {
+			files = append(files, file)
 		}
 		return nil
 	})
@@ -223,7 +236,7 @@ func (s *FileService) ExportToExcel(files []models.FileInfo, exportDir string) (
 	// 填充数据
 	for _, file := range files {
 		row := sheet.AddRow()
-		
+
 		row.AddCell().SetValue(file.Name)
 		row.AddCell().SetValue(file.Path)
 		row.AddCell().SetValue(file.Size)

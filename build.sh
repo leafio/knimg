@@ -17,6 +17,66 @@ export GOROOT=/usr/local/go
 # 成功构建的平台列表
 success_platforms=()
 
+# 本地打包模式：只为当前系统构建并打包
+if [ "$1" = "local" ]; then
+    LOCAL_OS=$(go env GOOS)
+    LOCAL_ARCH=$(go env GOARCH)
+    OUT="knimg-${LOCAL_OS}-${LOCAL_ARCH}"
+
+    echo "=== KnImg 本地打包 (${LOCAL_OS}/${LOCAL_ARCH}) ==="
+
+    LDFLAGS="-s -w"
+    if [ "$LOCAL_OS" = "windows" ]; then
+        LDFLAGS="-H=windowsgui -s -w"
+    fi
+
+    if ! GOOS=$LOCAL_OS GOARCH=$LOCAL_ARCH go build -ldflags="$LDFLAGS" -o "build/$OUT" .; then
+        echo "✗ 本地构建失败"
+        exit 1
+    fi
+    echo "✓ 构建成功: build/$OUT"
+
+    if [ "$LOCAL_OS" = "darwin" ]; then
+        APP="KnImg-${LOCAL_ARCH}.app"
+        TMP_APP="build/${APP}.tmp"
+        rm -rf "$TMP_APP"
+        mkdir -p "$TMP_APP/Contents/MacOS" "$TMP_APP/Contents/Resources"
+        cp "build/$OUT" "$TMP_APP/Contents/MacOS/"
+        chmod +x "$TMP_APP/Contents/MacOS/$OUT"
+
+        cat > "$TMP_APP/Contents/Info.plist" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleExecutable</key>
+    <string>$OUT</string>
+    <key>CFBundleIdentifier</key>
+    <string>com.knimg.app</string>
+    <key>CFBundleName</key>
+    <string>KnImg</string>
+    <key>CFBundleVersion</key>
+    <string>1.0</string>
+    <key>NSHighResolutionCapable</key>
+    <true/>
+</dict>
+</plist>
+EOF
+
+        rm -rf "build/$APP"
+        mv "$TMP_APP" "build/$APP"
+        echo "✓ 应用包创建成功: build/$APP"
+    elif [ "$LOCAL_OS" = "windows" ]; then
+        echo "✓ Windows 可执行文件: build/knimg-windows-amd64.exe"
+    else
+        echo "✓ 可执行文件: build/$OUT"
+    fi
+
+    echo "=== 本地打包完成 ==="
+    ls -la build/
+    exit 0
+fi
+
 # 编译Windows 64位 (窗口应用)
 echo "\n编译 Windows 64位 (窗口应用)..."
 GOOS=windows GOARCH=amd64 go build -ldflags="-H=windowsgui -s -w" -o build/knimg-windows-amd64.exe .

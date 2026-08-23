@@ -13,12 +13,12 @@ type FileInfo struct {
 
 // FileListRequest 文件列表请求参数
 type FileListRequest struct {
-	Search    string `json:"search" form:"search"`       // 名称模糊搜索
-	FileType  string `json:"file_type" form:"file_type"` // 文件类型筛选
-	FileExt   string `json:"file_ext" form:"file_ext"`   // 自定义扩展名筛选（多个用逗号分隔）
-	MinSize   int64  `json:"min_size" form:"min_size"`   // 最小大小（字节）
-	MaxSize   int64  `json:"max_size" form:"max_size"`   // 最大大小（字节）
-	SortBy    string `json:"sort_by" form:"sort_by"`     // 排序字段
+	Search    string `json:"search" form:"search"`         // 名称模糊搜索
+	FileType  string `json:"file_type" form:"file_type"`   // 文件类型筛选
+	FileExt   string `json:"file_ext" form:"file_ext"`     // 自定义扩展名筛选（多个用逗号分隔）
+	MinSize   int64  `json:"min_size" form:"min_size"`     // 最小大小（字节）
+	MaxSize   int64  `json:"max_size" form:"max_size"`     // 最大大小（字节）
+	SortBy    string `json:"sort_by" form:"sort_by"`       // 排序字段
 	SortOrder string `json:"sort_order" form:"sort_order"` // 排序方式 asc/desc
 }
 
@@ -26,27 +26,8 @@ type FileListRequest struct {
 type CompressRequest struct {
 	Files     []string `json:"files"`
 	Quality   int      `json:"quality"`
+	Format    string   `json:"format"` // 目标格式：空=原格式，jpeg/png
 	OutputDir string   `json:"output_dir"`
-	WorkDir   string   `json:"work_dir"` // 自定义工作目录
+	WorkDir   string   `json:"work_dir"`  // 自定义工作目录
 	Overwrite bool     `json:"overwrite"` // 是否覆盖原文件
-}
-
-// CompressResponse 压缩响应
-type CompressResponse struct {
-	Success    bool   `json:"success"`
-	Message    string `json:"message"`
-	OutputPath string `json:"output_path"`
-	OrigSize   int64  `json:"orig_size"`
-	NewSize    int64  `json:"new_size"`
-}
-
-// CompressionStats 压缩统计
-type CompressionStats struct {
-	TotalFiles int   `json:"total_files"`
-	TotalSize  int64 `json:"total_size"`
-}
-
-// ExportRequest 导出请求参数
-type ExportRequest struct {
-	Format string `json:"format" form:"format"` // excel, csv, json
 }

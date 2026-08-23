@@ -3,6 +3,13 @@
  * 包含通用工具函数和辅助方法
  */
 
+// HTML 转义，防止文件名中的特殊字符注入
+export function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text == null ? '' : String(text);
+    return div.innerHTML;
+}
+
 // 防抖函数
 export function debounce(func, wait) {
     let timeout;

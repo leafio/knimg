@@ -3,26 +3,47 @@
  * 负责文件列表的渲染和交互
  */
 
-import { formatSize } from './utils.js';
+import { formatSize, escapeHtml } from './utils.js';
+import { openImagePreview } from './preview.js';
+
+let thumbDelegated = false;
+
+// 缩略图点击事件委托（挂在持久容器上，重渲染不丢失）
+function ensureThumbDelegation(fileListEl) {
+    if (thumbDelegated) return;
+    thumbDelegated = true;
+    fileListEl.addEventListener('click', e => {
+        const link = e.target.closest('.file-thumb-link');
+        if (!link) return;
+        const workDir = document.getElementById('pathText').textContent;
+        openImagePreview(workDir, link.dataset.path, link.dataset.name);
+    });
+}
+
+function buildThumbHtml(file, workDir) {
+    if (file.type !== 'image') {
+        return '<div class="file-thumb-placeholder"></div>';
+    }
+    const src = `/api/file/image?work_dir=${encodeURIComponent(workDir)}&path=${encodeURIComponent(file.path)}`;
+    return `<span class="file-thumb-link" data-path="${escapeHtml(file.path)}" data-name="${escapeHtml(file.name)}">
+                <img class="file-thumb" src="${src}" loading="lazy" alt="">
+            </span>`;
+}
 
 // 渲染文件列表
 export function renderFileList(fileList, state) {
     const fileListEl = document.getElementById('fileList');
+    ensureThumbDelegation(fileListEl);
 
-    console.log('🎨 renderFileList 被调用');
-    console.log('🎨 fileList 长度:', fileList.length);
-    console.log('🎨 fileListEl:', fileListEl);
-
-    // 显示文件列表
     fileListEl.style.display = 'block';
-    console.log('✅ fileListEl.style.display 设置为 block');
 
     // 如果文件列表为空,显示空提示
     if (fileList.length === 0) {
         fileListEl.innerHTML = '<div class="empty-result">暂无符合条件的文件</div>';
-        console.log('📝 文件列表为空，显示空提示');
         return;
     }
+
+    const workDir = document.getElementById('pathText').textContent;
 
     const maxSize = Math.max(...fileList.map(f => f.size || 0));
 
@@ -49,10 +70,11 @@ export function renderFileList(fileList, state) {
                                ${file.type === 'image' ? '' : 'disabled'} ${file.selected ? 'checked' : ''}>
                         <div class="file-info">
                             <div class="file-name">
-                                ${file.name}
+                                ${buildThumbHtml(file, workDir)}
+                                <span class="file-name-text">${escapeHtml(file.name)}</span>
                                 ${typeLabels[file.type] || typeLabels['other']}
                             </div>
-                            <div class="file-meta">${file.path} | 修改时间: ${file.mod_time}</div>
+                            <div class="file-meta">${escapeHtml(file.path)} | 修改时间: ${escapeHtml(file.mod_time)}</div>
                         </div>
                         <div class="file-size">
                             ${formatSize(file.size)}
@@ -96,11 +118,11 @@ export function renderFileList(fileList, state) {
 
 // 全选/取消全选
 export function toggleSelectAll(checkbox, state) {
-    document.querySelectorAll('.file-checkbox:not([disabled])').forEach((cb, index) => {
-        cb.checked = checkbox.checked;
-        if (state.filteredFiles[index]) {
-            state.filteredFiles[index].selected = checkbox.checked;
-        }
+    state.filteredFiles.forEach((file, index) => {
+        if (file.type !== 'image') return;
+        file.selected = checkbox.checked;
+        const cb = document.querySelector(`.file-checkbox[data-index="${index}"]`);
+        if (cb) cb.checked = checkbox.checked;
     });
     updateCompressPanel(state);
 }
